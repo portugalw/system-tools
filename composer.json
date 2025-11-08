@@ -1,0 +1,15 @@
+{
+    "name": "helpinfancia/systemtools",
+    "autoload": {
+        "psr-4": {
+            "SystemToolsHelpInfancia\\": "includes/"
+        }
+    },
+    "authors": [
+        {
+            "name": "portugal",
+            "email": "portugalw@gmail.com"
+        }
+    ],
+    "require": {}
+}
