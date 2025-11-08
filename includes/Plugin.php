@@ -2,6 +2,7 @@
 
 namespace SystemToolsHelpInfancia;
 
+use SystemToolsHelpInfancia\Public\ApiUser;
 use SystemToolsHelpInfancia\Activate;
 use SystemToolsHelpInfancia\Deactivate;
 
@@ -33,6 +34,8 @@ final class Plugin
 
       //add_filter("plugin_action_links", array($this, 'settings_link'));
       ///add_filter('plugin_action_links', 'settings_link', 10, 2);
+
+      new ApiUser();
    }
 
    protected function __clone() {}

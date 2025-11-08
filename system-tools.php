@@ -35,12 +35,20 @@ require_once ST_PLUGIN_PATH . '/includes/Activate.php';
 require_once ST_PLUGIN_PATH . '/includes/Deactivate.php';
 
 
+//External
+
+if (file_exists(MEMBERSHIPLITE_DIR . '/core/classes/class.arm_members.php')) {
+   require_once MEMBERSHIPLITE_DIR . '/core/classes/class.arm_members.php';
+}
+
+
 if (file_exists(dirname(__FILE__) . '/vendor/autoload.php')) {
    require_once dirname(__FILE__) . '/vendor/autoload.php';
 }
 
-
 if (class_exists(Plugin::class)) {
+
+
 
    function STHI(): ?Plugin
    {
