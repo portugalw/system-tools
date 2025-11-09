@@ -27,8 +27,13 @@ define('ST_PLUGIN_PATH', untrailingslashit(plugin_dir_path(ST_PLUGIN_FILE)));
 define('ST_PLUGIN_URL', untrailingslashit(plugin_dir_url(ST_PLUGIN_FILE)));
 
 //PAGES
-define('ST_PAGE_ADMIN_INDEX', ST_PLUGIN_PATH . '/templates/admin.php');
-define('ST_PAGE_ADMIN_CADASTRO_TEMPLATE_EMAIL', ST_PLUGIN_PATH . '/templates/cadastro-template-email.php');
+$pagesPrefixFolder = ST_PLUGIN_PATH . '/pages';
+define('ST_PAGE_ADMIN_INDEX', $pagesPrefixFolder  . '/admin.php');
+define('ST_PAGE_ADMIN_CADASTRO_TEMPLATE_EMAIL', $pagesPrefixFolder  . '/cadastro-template-email.php');
+define('ST_PAGE_ADMIN_EVENT_LOG', $pagesPrefixFolder  . '/event-log-view.php');
+define('ST_PAGE_ADMIN_REQUEST_LOG', $pagesPrefixFolder  . '/request-log-view.php');
+
+
 
 require_once ST_PLUGIN_PATH . '/includes/Plugin.php';
 require_once ST_PLUGIN_PATH . '/includes/Activate.php';

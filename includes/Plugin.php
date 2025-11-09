@@ -83,23 +83,23 @@ final class Plugin
 
    function add_admin_pages()
    {
-      add_menu_page('Help Infância Tool', 'Help Infância Tool', 'manage_options', 'system_tools', array($this, 'admin_page_index_callback'), 'dashicons-store', 110);
+      add_menu_page('Help Infância Tool', 'Help Infância Tool', 'manage_options', 'system_tools', array($this, 'admin_page_index_callback'), 'dashicons-admin-generic', 110);
 
       add_submenu_page(
          'system_tools',
-         'Template de Email',
-         'Template de Email',
+         'Log de Eventos',
+         'Log de Eventos',
          'manage_options',
-         'mpg-template-email',
-         array($this, 'render_template_email_page') // Callback
+         'st-event-log',
+         array($this, 'admin_page_event_log_callback') // Callback
       );
       add_submenu_page(
          'system_tools',
-         'Template de Email',
-         'Template de Email',
+         'Request Logs',
+         'Request Logs',
          'manage_options',
-         'mpg-template-email',
-         array($this, 'render_template_email_page') // Callback
+         'st-request-log',
+         array($this, 'admin_page_request_log_callback') // Callback
       );
    }
 
@@ -107,9 +107,15 @@ final class Plugin
    {
       require_once ST_PAGE_ADMIN_INDEX;
    }
-   function render_template_email_page()
+
+   function admin_page_event_log_callback()
    {
-      require_once ST_PAGE_ADMIN_CADASTRO_TEMPLATE_EMAIL;
+      require_once ST_PAGE_ADMIN_EVENT_LOG;
+   }
+
+   function admin_page_request_log_callback()
+   {
+      require_once ST_PAGE_ADMIN_REQUEST_LOG;
    }
 
    function custom_post_type()
