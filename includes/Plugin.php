@@ -9,7 +9,11 @@ use SystemToolsHelpInfancia\Deactivate;
 defined('ABSPATH') || exit;
 
 define('ST_PLUGIN_STYLE_CSS', untrailingslashit(plugins_url('/assets/system-tools-style.css', ST_PLUGIN_FILE)));
+define('ST_PLUGIN_STYLE_ADMIN_LOGS_CSS', untrailingslashit(plugins_url('/assets/system-tools-admin-logs.css', ST_PLUGIN_FILE)));
+
+
 define('ST_PLUGIN_SCRIPT_JS', untrailingslashit(plugins_url('/assets/system-tools-script.js', ST_PLUGIN_FILE)));
+
 
 
 final class Plugin
@@ -70,6 +74,7 @@ final class Plugin
    function enqueue()
    {
       wp_enqueue_style('mypluginstyle', ST_PLUGIN_STYLE_CSS);
+      wp_enqueue_style('stpluginstyleadminlogscss', ST_PLUGIN_STYLE_ADMIN_LOGS_CSS);
       wp_enqueue_script('mypluginscript', ST_PLUGIN_SCRIPT_JS);
    }
 

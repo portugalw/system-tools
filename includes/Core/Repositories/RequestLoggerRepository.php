@@ -1,22 +1,27 @@
 <?php
 
 
-namespace SystemToolsHelpInfancia\Core;
+namespace SystemToolsHelpInfancia\Core\Repositories;
 
 class RequestLogger
 {
-   function __construct() {}
+   private $wpdb;
+   private $table;
 
-   static function log($request)
+   public function __construct(\wpdb $wpdb)
    {
-      global $wpdb;
+      $this->wpdb = $wpdb;
+      $this->table = $wpdb->prefix . 'request_logs';
+   }
 
+
+   public function log($request)
+   {
       // Obter o corpo da mensagem
       $request_body = json_encode($request->get_json_params());
 
       // Inserir no banco de dados
-      $table_name = $wpdb->prefix . 'request_logs';
-      $wpdb->insert($table_name, [
+      return $this->wpdb->insert($this->table, [
          'request_body' => $request_body,
       ]);
 

@@ -7,87 +7,112 @@ global $wpdb;
 // Nome da tabela
 $nome_tabela = $wpdb->prefix . 'log_event';
 
-// Processa o formulário de pesquisa
+// Campos de filtro
 $search_query = isset($_GET['logsearch']) ? sanitize_text_field($_GET['logsearch']) : '';
+$evento       = isset($_GET['evento']) ? sanitize_text_field($_GET['evento']) : '';
+$origem       = isset($_GET['origem']) ? sanitize_text_field($_GET['origem']) : '';
+$descricao        = isset($_GET['descricao']) ? sanitize_text_field($_GET['descricao']) : '';
 
-// Consulta os logs (inclui filtro se houver busca)
+// Monta consulta base
+$query = "SELECT * FROM $nome_tabela WHERE 1=1";
+
+// Filtro de pesquisa geral
 if (!empty($search_query)) {
-   $logs = $wpdb->get_results(
-      $wpdb->prepare(
-         "SELECT * FROM $nome_tabela 
-                 WHERE event LIKE %s OR description LIKE %s OR origin LIKE %s
-                 ORDER BY ID DESC",
-         '%' . $search_query . '%', // O %s será substituído por isso
-         '%' . $search_query . '%', // O %s será substituído por isso
-         '%' . $search_query . '%'  // O %s será substituído por isso
-      )
+   $query .= $wpdb->prepare(
+      " AND (event LIKE %s OR description LIKE %s OR origin LIKE %s OR description LIKE %s)",
+      "%$search_query%",
+      "%$search_query%",
+      "%$search_query%",
+      "%$search_query%"
    );
-} else {
-   // Busca todos os logs se não houver pesquisa
-   $logs = $wpdb->get_results("SELECT * FROM $nome_tabela ORDER BY ID DESC");
 }
 
+// Filtros específicos
+if (!empty($evento)) {
+   $query .= $wpdb->prepare(" AND event LIKE %s", "%$evento%");
+}
+if (!empty($origem)) {
+   $query .= $wpdb->prepare(" AND origin LIKE %s", "%$origem%");
+}
+if (!empty($descricao)) {
+   $query .= $wpdb->prepare(" AND description LIKE %s", "%$descricao%");
+}
+
+// Ordena por mais recente
+$query .= " ORDER BY id DESC";
+
+// Executa query
+$logs = $wpdb->get_results($query);
+$total_logs = count($logs);
+
 // -----------------------------------------------------------------
-// 2. BLOCO DE TEMPLATE HTML (Renderização)
-// Fechamos o PHP para escrever HTML puro.
+// 2. INCLUI CSS PERSONALIZADO
 // -----------------------------------------------------------------
+
 ?>
 
-<div class="wrap">
-   <h1>Logs do Sistema</h1>
+<div class="wrap logs-admin-page">
+   <h1 class="page-title">📘 Logs dos Eventos</h1>
+   <p class="page-subtitle">Visualize, filtre e analise os registros do sistema.</p>
 
-   <form method="get" action="">
+   <!-- Formulário de Filtros -->
+   <form id="logFilterForm" method="get" action="" class="filter-form">
       <input type="hidden" name="page" value="st-event-log">
-      <p>
-         <input type="text"
-            name="logsearch"
-            value="<?= esc_attr($search_query); ?>"
-            placeholder="Pesquisar logs..."
-            style="width: 300px; padding: 5px;">
 
-         <input type="submit" value="Pesquisar" class="button button-primary">
-      </p>
+      <div class="filter-fields">
+         <input type="text" name="logsearch" value="<?= esc_attr($search_query); ?>" placeholder="Pesquisar logs...">
+         <input type="text" name="evento" value="<?= esc_attr($evento); ?>" placeholder="Evento">
+         <input type="text" name="origem" value="<?= esc_attr($origem); ?>" placeholder="Origem">
+         <input type="text" name="descricao" value="<?= esc_attr($descricao); ?>" placeholder="Descrição">
+
+         <input type="submit" value="🔍 Filtrar" class="button button-primary">
+         <button type="button" id="clearFiltersBtn" class="button button-secondary">🧹 Limpar</button>
+      </div>
    </form>
 
-   <table class="widefat fixed" cellspacing="0">
+   <p class="log-count">
+      <?= $total_logs; ?> registro(s) encontrado(s)
+   </p>
+
+   <!-- Tabela -->
+   <table class="widefat fixed log-table">
       <thead>
          <tr>
             <th width="5%">ID</th>
             <th width="10%">Data</th>
             <th width="20%">Evento</th>
             <th width="15%">Origem</th>
+            <th width="20%">E-mail</th>
             <th>Descrição</th>
          </tr>
       </thead>
       <tbody>
-         <?php
-         // Reabrimos o PHP para usar lógica (o loop)
-         if ($logs) :
-            // Usamos a sintaxe de loop : e endforeach; que é mais limpa em templates
-            foreach ($logs as $log) :
-               // Fechamos o PHP de novo para escrever o HTML da linha
-         ?>
+         <?php if ($logs): ?>
+            <?php foreach ($logs as $log): ?>
                <tr>
-                  <td><?= esc_html($log->id); ?></td>
+                  <td><strong><?= esc_html($log->id); ?></strong></td>
                   <td><?= esc_html($log->date); ?></td>
                   <td><?= esc_html($log->event); ?></td>
                   <td><?= esc_html($log->origin); ?></td>
+                  <td><?= esc_html($log->customer_email); ?></td>
                   <td><?= esc_html($log->description); ?></td>
                </tr>
-            <?php
-            // Reabrimos o PHP para fechar o loop
-            endforeach;
-         else :
-            // Caso não haja logs
-            ?>
+            <?php endforeach; ?>
+         <?php else: ?>
             <tr>
-               <td colspan="5">Nenhum log encontrado.</td>
+               <td colspan="6" class="no-results">Nenhum log encontrado.</td>
             </tr>
-         <?php
-         // Fechamos o if/else
-         endif;
-         ?>
+         <?php endif; ?>
       </tbody>
    </table>
-
 </div>
+
+<!-- Script para limpar e submeter -->
+<script>
+   document.getElementById('clearFiltersBtn').addEventListener('click', function() {
+      const form = document.getElementById('logFilterForm');
+      const inputs = form.querySelectorAll('input[type="text"]');
+      inputs.forEach(input => input.value = '');
+      form.submit();
+   });
+</script>

@@ -47,6 +47,7 @@ class Activate
         date datetime DEFAULT current_timestamp() NOT NULL,
         event longtext NOT NULL,
         description longtext NOT NULL,
+        customer_email varchar(150) NULL,
         origin varchar(400) NULL,
         PRIMARY KEY  (id)
     ) $charset_collate;";
