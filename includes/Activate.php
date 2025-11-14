@@ -66,6 +66,7 @@ class Activate
          event_type VARCHAR(100) NOT NULL, -- e.g. 'PointsCredited', 'PointsConsumed'
          payload JSON NOT NULL,
          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+         created_user_id BIGINT UNSIGNED NOT NULL,
          metadata JSON NULL, -- { command_id, actor_id, ip, source, reason }
          version INT NOT NULL DEFAULT 1, -- aggregate version at append time
          UNIQUE KEY uq_event_eventid (event_id),
@@ -100,6 +101,7 @@ class Activate
          points_remaining INT NOT NULL,
          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
          expires_at DATETIME NULL,
+         created_user_id BIGINT UNSIGNED NOT NULL,
          status ENUM('active','expired','consumed','adjusted') NOT NULL DEFAULT 'active',
          metadata JSON NULL,
          KEY idx_user_expires (user_id, expires_at),
@@ -119,7 +121,10 @@ class Activate
          balance_after INT NOT NULL, -- auxílio para auditoria
          related_resource VARCHAR(255) NULL, -- ex: order_id, usage_id
          note TEXT NULL,
+         metadata JSON NULL,
+         batch_afected JSON NULL,
          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+         created_user_id BIGINT UNSIGNED NOT NULL,
          KEY idx_user_created (user_id, created_at),
          KEY idx_event (event_id)
          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
@@ -137,6 +142,7 @@ class Activate
          target_id BIGINT UNSIGNED NULL,
          details JSON NULL,
          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+         created_user_id BIGINT UNSIGNED NOT NULL,
          KEY idx_actor (actor_id)
          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
 

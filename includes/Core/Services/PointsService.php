@@ -88,6 +88,7 @@ class PointsService
 
       // Insert transaction
       $balance_after = self::getUserBalance($wpdb, $user_id);
+
       $wpdb->insert("{$prefix}st_points_transactions", [
          'user_id' => $user_id,
          'event_id' => $event['event_id'],
@@ -103,23 +104,47 @@ class PointsService
       $prefix = $wpdb->prefix;
       $payload = $event['payload'];
       $user_id = (int)$event['aggregate_id'];
-      $points = (int)($payload['points'] ?? 0);
-      $alloc = $payload['allocation'] ?? [];
+      $event_id = $event['event_id'];
+      $points_to_consume = (int)($payload['points'] ?? 0);
 
-      if ($points <= 0) return;
+      $balance = self::getUserBalance($wpdb, $user_id);
 
-      // For each allocation, reduce points_remaining in batch
-      foreach ($alloc as $a) {
-         $batch_id = (int)$a['batch_id'];
-         $qty = (int)$a['points'];
-         if ($qty <= 0) continue;
+      if ($balance < $points_to_consume) {
+         throw new \Exception("Saldo insuficiente: Pontos para consumir: $points_to_consume ponto(s). Saldo: $balance ponto(s)");
+      }
+      // 2. Select batches ordered by expires_at ASC (earliest expire first), then created_at
+      $queryBatches = "
+        SELECT batch_id, points_remaining
+        FROM {$wpdb->prefix}st_points_batches
+        WHERE user_id = %d
+          AND points_remaining > 0
+          AND status = 'active'
+        ORDER BY 
+            COALESCE(expires_at, '9999-12-31') ASC,
+            created_at ASC
+        FOR UPDATE
+    ";
+      $batches = $wpdb->get_results($wpdb->prepare($queryBatches, $user_id), ARRAY_A);
+
+      $allocations = [];
+      $remaining = $points_to_consume;
+      foreach ($batches as $b) {
+         if ($remaining <= 0) break;
+         $take = min($b['points_remaining'], $remaining);
+         $batch_id = $b['batch_id'];
+         // decrement batch
          $wpdb->query($wpdb->prepare("
                 UPDATE {$prefix}st_points_batches
-                SET points_remaining = GREATEST(points_remaining - %d, 0),
-                    points_total = points_total
+                SET points_remaining = GREATEST(points_remaining - %d, 0)
                 WHERE batch_id = %d
-            ", $qty, $batch_id));
+            ", $take, $batch_id));
+         $allocations[] = ['batch_id' => $batch_id, 'points' => $take];
+         $remaining -= $take;
       }
+      if ($remaining > 0) {
+         throw new \Exception("Erro de alocação: não foi possível alocar todos os pontos. Pontos Restantes: $remaining");
+      }
+
 
       // Update balance
       $wpdb->query($wpdb->prepare("
@@ -128,18 +153,19 @@ class PointsService
                 total_spent = total_spent + %d,
                 last_event_id = %s
             WHERE user_id = %d
-        ", $points, $points, $event['event_id'], $user_id));
+        ", $points_to_consume, $points_to_consume, $event['event_id'], $user_id));
 
       $balance_after = self::getUserBalance($wpdb, $user_id);
       // Insert transaction
       $wpdb->insert("{$prefix}st_points_transactions", [
          'user_id' => $user_id,
-         'event_id' => $event['event_id'],
+         'event_id' => $event_id,
          'type' => 'consume',
-         'amount' => -$points,
+         'amount' => -$points_to_consume,
          'balance_after' => $balance_after,
-         'related_resource' => $payload['usage_id'] ?? null
-      ], ['%d', '%s', '%s', '%d', '%d', '%s']);
+         'related_resource' => $payload['usage_id'] ?? null,
+         'batch_afected' =>  wp_json_encode($allocations),
+      ], ['%d', '%s', '%s', '%d', '%d', '%s', '%s']);
    }
 
    private static function applyExpire(\wpdb $wpdb, array $event)
@@ -152,7 +178,7 @@ class PointsService
 
       if ($expired_points <= 0) {
          // Still mark batch expired if needed
-         $wpdb->query($wpdb->prepare("UPDATE {$prefix}points_batches SET status='expired' WHERE batch_id=%d", $batch_id));
+         $wpdb->query($wpdb->prepare("UPDATE {$prefix}st_points_batches SET status='expired' WHERE batch_id=%d", $batch_id));
          return;
       }
 
@@ -200,12 +226,8 @@ class PointsService
    {
       $prefix = $wpdb->prefix;
       $res = $wpdb->get_row($wpdb->prepare("SELECT available_points FROM {$prefix}st_points_balance WHERE user_id = %d", $user_id));
+      echo $res->available_points;
       return $res ? (int)$res->available_points : 0;
-   }
-
-   private static function getUserBalanceAlias(\wpdb $wpdb, int $user_id)
-   {
-      return self::getUserBalance($wpdb, $user_id);
    }
 
 

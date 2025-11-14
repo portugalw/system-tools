@@ -31,6 +31,8 @@ $pagesPrefixFolder = ST_PLUGIN_PATH . '/pages';
 define('ST_PAGE_ADMIN_INDEX', $pagesPrefixFolder  . '/admin.php');
 define('ST_PAGE_ADMIN_CADASTRO_TEMPLATE_EMAIL', $pagesPrefixFolder  . '/cadastro-template-email.php');
 define('ST_PAGE_ADMIN_CADASTRO_PLANO_USUARIO', $pagesPrefixFolder  . '/plano-usuario-cadastro.php');
+define('ST_PAGE_ADMIN_DEBITO_PONTOS_USUARIO', $pagesPrefixFolder  . '/plano-usuario-debito-pontos.php');
+
 define('ST_PAGE_ADMIN_EVENT_LOG', $pagesPrefixFolder  . '/event-log-view.php');
 define('ST_PAGE_ADMIN_REQUEST_LOG', $pagesPrefixFolder  . '/request-log-view.php');
 

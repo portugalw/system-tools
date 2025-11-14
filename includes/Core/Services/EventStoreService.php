@@ -34,36 +34,114 @@ class EventStoreService
          $meta
       );
 
-      $this->appendEvent($event);
-      return true;
+
+      return $this->appendEvent($event);
+   }
+
+   function handle_consume_plan($user_id, $plan_id,  $points)
+   {
+
+      $payload = ['user_id' => $user_id, 'plan_id' => $plan_id, 'points' => $points, 'source' => 'consumo_help_infancia'];
+      $meta = ['actor_id' => $user_id, 'ip' => $_SERVER['REMOTE_ADDR']];
+
+      $event = EventFactory::create(
+         'UserPoints',
+         $user_id,
+         'AdminDeductedPoints',
+         $payload,
+         $meta
+      );
+
+      return  $this->appendEvent($event);;
    }
 
    /**
     * Append event atomically and apply projection synchronously.
     * Returns true if inserted, false if duplicate.
     */
-   public function appendEvent(array $event): bool
+   public function appendEvent($event)
    {
-      // Use $wpdb->prepare for safety and wpdb->query for transactions
-      $this->wpdb->query('START TRANSACTION');
+      try {
 
-      $res = $this->eventStoreRepository->create($event);
+         // -----------------------------------
+         // INÍCIO DA TRANSAÇÃO
+         // -----------------------------------
+         $this->wpdb->query('START TRANSACTION');
 
-      if ($res === false) {
-         // Duplicate or DB error
-         $error = $this->wpdb->last_error;
-         $this->wpdb->query('ROLLBACK');
-         // If duplicate command_id or event_id, treat as idempotent
-         if (stripos($error, 'Duplicate') !== false) {
-            return false;
+         // Tenta gravar o evento no Event Store
+         $res = $this->eventStoreRepository->create($event);
+
+         if ($res === false) {
+            $error = $this->wpdb->last_error;
+
+            // Log do erro no EventStore
+            error_log("[EventStore] Falha ao criar evento: {$error}");
+
+            // Se for duplicidade => idempotência
+            if (stripos($error, 'Duplicate') !== false) {
+               $this->wpdb->query('ROLLBACK');
+
+               return [
+                  'success' => true,
+                  'message' => 'Operação idempotente: evento já havia sido processado.'
+               ];
+            }
+
+            // Outro tipo de erro => rollback e erro
+            $this->wpdb->query('ROLLBACK');
+
+            return [
+               'success' => false,
+               'message' => "Erro ao gravar evento no EventStore: {$error}"
+            ];
          }
-         throw new \RuntimeException("EventStore append failed: {$error}");
+
+         // -----------------------------------
+         // APLICA PROJEÇÕES (síncrono)
+         // -----------------------------------
+         try {
+            PointsService::apply($this->wpdb, $event);
+         } catch (\Throwable $t) {
+            // Se falhar a projeção => rollback
+            $this->wpdb->query('ROLLBACK');
+
+            $msg = $t->getMessage();
+            error_log("[Projection] Falha ao aplicar projeção: {$msg}");
+
+            return [
+               'success' => false,
+               'message' => "Erro ao aplicar projeção: {$msg}"
+            ];
+         }
+
+         // -----------------------------------
+         // SUCESSO TOTAL
+         // -----------------------------------
+         $this->wpdb->query('COMMIT');
+
+         return [
+            'success' => true,
+            'message' => 'Evento processado com sucesso.'
+         ];
+      } catch (\Throwable $e) {
+
+         // -----------------------------------
+         // FAIL-SAFE → GARANTE ROLLBACK
+         // -----------------------------------
+         try {
+            $this->wpdb->query('ROLLBACK');
+         } catch (\Throwable $ignored) {
+            // ignora erro de rollback — loga somente
+            error_log("[EventStore] Falha ao executar rollback: {$ignored->getMessage()}");
+         }
+
+         $msg = $e->getMessage();
+         error_log("[EventStore] Erro crítico: {$msg}");
+
+         return [
+            'success' => false,
+            'message' => "Erro inesperado: {$msg}"
+         ];
       }
-
-      // Apply to projections synchronously (ProjectionHandler may also be async in bigger systems)
-      PointsService::apply($this->wpdb, $event);
-
-      $this->wpdb->query('COMMIT');
-      return true;
    }
 }

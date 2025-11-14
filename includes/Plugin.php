@@ -114,8 +114,21 @@ final class Plugin
          'manage_options',
          'purchase-plan-screen',
          array($this, 'admin_page_purchase_user_plan_callback'), // Callback
-         'dashicons-tickets-alt',
-         40
+         40,
+         'dashicons-tickets-alt'
+
+      );
+
+      add_submenu_page(
+         'system_tools',
+         'Registrar Débito Pontos',
+         'Débito de Pontos',
+         'manage_options',
+         'debit-plan-screen',
+         array($this, 'admin_page_usuario_debito_pontos_callback'), // Callback
+         40,
+         'dashicons-tickets-alt'
+
       );
    }
 
@@ -134,6 +147,10 @@ final class Plugin
       require_once ST_PAGE_ADMIN_REQUEST_LOG;
    }
 
+   function admin_page_usuario_debito_pontos_callback()
+   {
+      require_once ST_PAGE_ADMIN_DEBITO_PONTOS_USUARIO;
+   }
    function admin_page_purchase_user_plan_callback()
    {
       require_once ST_PAGE_ADMIN_CADASTRO_PLANO_USUARIO;
