@@ -3,6 +3,7 @@
 namespace SystemToolsHelpInfancia\Core\Services;
 
 use SystemToolsHelpInfancia\Core\Repositories\EventStoreRepository;
+use SystemToolsHelpInfancia\Core\Repositories\PointsBatchRepository;
 
 if (!defined('ABSPATH')) exit;
 
@@ -13,17 +14,22 @@ class PointsService
    private $tableBatches;
    private $tableProjection;
    private $tableEvents;
+   private $pointsBatchRepository;
+
    public function __construct(\wpdb $wpdb)
 
    {
       $this->wpdb = $wpdb;
-      $this->tableBatches = $wpdb->prefix . 'points_batches';
-      $this->tableProjection = $wpdb->prefix . 'points_projection';
-      $this->tableEvents = $wpdb->prefix . 'points_events';
+      $this->tableBatches = $wpdb->prefix . 'st_points_batches';
+      $this->tableProjection = $wpdb->prefix . 'st_points_projection';
+      $this->tableEvents = $wpdb->prefix . 'st_points_events';
    }
 
    public static function apply(\wpdb $wpdb, array $event): void
    {
+      $pointsBatchRepository = new PointsBatchRepository($wpdb);
+
+
       switch ($event['event_type']) {
          case 'PlanPurchased':
          case 'PointsCredited':
@@ -61,7 +67,7 @@ class PointsService
       if ($points <= 0) return;
 
       // Insert batch
-      $wpdb->insert("{$prefix}points_batches", [
+      $wpdb->insert("{$prefix}st_points_batches", [
          'user_id' => $user_id,
          'origin_event_id' => $event['event_id'],
          'points_total' => $points,
@@ -72,7 +78,7 @@ class PointsService
 
       // Update balance (upsert)
       $wpdb->query($wpdb->prepare("
-            INSERT INTO {$prefix}points_balance (user_id, available_points, total_earned, last_event_id)
+            INSERT INTO {$prefix}st_points_balance (user_id, available_points, total_earned, last_event_id)
             VALUES (%d, %d, %d, %s)
             ON DUPLICATE KEY UPDATE
                available_points = available_points + VALUES(available_points),
@@ -82,7 +88,7 @@ class PointsService
 
       // Insert transaction
       $balance_after = self::getUserBalance($wpdb, $user_id);
-      $wpdb->insert("{$prefix}points_transactions", [
+      $wpdb->insert("{$prefix}st_points_transactions", [
          'user_id' => $user_id,
          'event_id' => $event['event_id'],
          'type' => 'credit',
@@ -108,7 +114,7 @@ class PointsService
          $qty = (int)$a['points'];
          if ($qty <= 0) continue;
          $wpdb->query($wpdb->prepare("
-                UPDATE {$prefix}points_batches
+                UPDATE {$prefix}st_points_batches
                 SET points_remaining = GREATEST(points_remaining - %d, 0),
                     points_total = points_total
                 WHERE batch_id = %d
@@ -117,7 +123,7 @@ class PointsService
 
       // Update balance
       $wpdb->query($wpdb->prepare("
-            UPDATE {$prefix}points_balance
+            UPDATE {$prefix}st_points_balance
             SET available_points = available_points - %d,
                 total_spent = total_spent + %d,
                 last_event_id = %s
@@ -126,7 +132,7 @@ class PointsService
 
       $balance_after = self::getUserBalance($wpdb, $user_id);
       // Insert transaction
-      $wpdb->insert("{$prefix}points_transactions", [
+      $wpdb->insert("{$prefix}st_points_transactions", [
          'user_id' => $user_id,
          'event_id' => $event['event_id'],
          'type' => 'consume',
@@ -152,7 +158,7 @@ class PointsService
 
       // Update batch (zero remaining, mark expired)
       $wpdb->query($wpdb->prepare("
-            UPDATE {$prefix}points_batches
+            UPDATE {$prefix}st_points_batches
             SET points_remaining = 0,
                 status = 'expired'
             WHERE batch_id = %d
@@ -160,7 +166,7 @@ class PointsService
 
       // Update balance
       $wpdb->query($wpdb->prepare("
-            UPDATE {$prefix}points_balance
+            UPDATE {$prefix}st_points_balance
             SET available_points = GREATEST(available_points - %d, 0),
                 total_expired = total_expired + %d,
                 last_event_id = %s
@@ -170,7 +176,7 @@ class PointsService
       $balance_after = self::getUserBalance($wpdb, $user_id);
 
       // Insert transaction
-      $wpdb->insert("{$prefix}points_transactions", [
+      $wpdb->insert("{$prefix}st_points_transactions", [
          'user_id' => $user_id,
          'event_id' => $event['event_id'],
          'type' => 'expire',
@@ -193,7 +199,7 @@ class PointsService
    public static function getUserBalance(\wpdb $wpdb, int $user_id): int
    {
       $prefix = $wpdb->prefix;
-      $res = $wpdb->get_row($wpdb->prepare("SELECT available_points FROM {$prefix}points_balance WHERE user_id = %d", $user_id));
+      $res = $wpdb->get_row($wpdb->prepare("SELECT available_points FROM {$prefix}st_points_balance WHERE user_id = %d", $user_id));
       return $res ? (int)$res->available_points : 0;
    }
 

@@ -106,6 +106,17 @@ final class Plugin
          'st-request-log',
          array($this, 'admin_page_request_log_callback') // Callback
       );
+
+      add_submenu_page(
+         'system_tools',
+         'Registrar Compra de Plano',
+         'Compra de Plano',
+         'manage_options',
+         'purchase-plan-screen',
+         array($this, 'admin_page_purchase_user_plan_callback'), // Callback
+         'dashicons-tickets-alt',
+         40
+      );
    }
 
    function admin_page_index_callback()
@@ -122,6 +133,14 @@ final class Plugin
    {
       require_once ST_PAGE_ADMIN_REQUEST_LOG;
    }
+
+   function admin_page_purchase_user_plan_callback()
+   {
+      require_once ST_PAGE_ADMIN_CADASTRO_PLANO_USUARIO;
+      // add_action('admin_post_save_purchase_plan', 'handle_form');
+   }
+
+
 
    function custom_post_type()
    {

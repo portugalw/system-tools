@@ -21,8 +21,8 @@ class EventStoreRepository
       $sql = $this->wpdb->prepare(
          "
             INSERT INTO {$this->table}
-            (event_id, aggregate_type, aggregate_id, event_type, payload, metadata, command_id, version, created_at)
-            VALUES (%s, %s, %d, %s, %s, %s, %s, %d, %s)
+            (event_id, aggregate_type, aggregate_id, event_type, payload, metadata, version, created_at)
+            VALUES (%s, %s, %d, %s, %s, %s, %d, %s)
         ",
          $event['event_id'],
          $event['aggregate_type'],
@@ -30,7 +30,7 @@ class EventStoreRepository
          $event['event_type'],
          wp_json_encode($event['payload']),
          wp_json_encode($event['metadata']),
-         $event['command_id'],
+         //  $event['command_id'],
          $event['version'],
          $event['created_at']
       );

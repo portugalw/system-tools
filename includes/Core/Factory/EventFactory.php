@@ -15,13 +15,12 @@ class EventFactory
       string $eventType,
       array $payload,
       array $metadata = [],
-      ?string $commandId = null,
       int $version = 1
    ): array {
       $eventId =  Util::generateUuidV4();
 
-      if (!$commandId) {
-         $commandId = Util::generateUuidV4();
+      if (!$eventId) {
+         $eventId = Util::generateUuidV4();
       }
 
       $metadata = array_merge([
@@ -36,7 +35,6 @@ class EventFactory
          'event_type' => $eventType,
          'payload' => $payload,
          'metadata' => $metadata,
-         'command_id' => $commandId,
          'version' => $version,
          'created_at' => date('Y-m-d H:i:s')
       ];

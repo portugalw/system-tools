@@ -2,6 +2,7 @@
 
 namespace SystemToolsHelpInfancia\Core\Services;
 
+use SystemToolsHelpInfancia\Core\Factory\EventFactory;
 use SystemToolsHelpInfancia\Core\Repositories\EventStoreRepository;
 
 if (!defined('ABSPATH')) exit;
@@ -17,11 +18,31 @@ class EventStoreService
       $this->eventStoreRepository = new EventStoreRepository($wpdb);
    }
 
+   function handle_purchase_plan($user_id, $plan_id)
+   {
+      $points = 10; // regra
+      $expires_at = date('Y-m-d H:i:s', strtotime('+30 days'));
+
+      $payload = ['user_id' => $user_id, 'plan_id' => $plan_id, 'points' => $points, 'expires_at' => $expires_at, 'source' => 'plan_purchase'];
+      $meta = ['actor_id' => $user_id, 'ip' => $_SERVER['REMOTE_ADDR']];
+
+      $event = EventFactory::create(
+         'UserPoints',
+         $user_id,
+         'AdminGrantedPoints',
+         $payload,
+         $meta
+      );
+
+      $this->appendEvent($event);
+      return true;
+   }
+
    /**
     * Append event atomically and apply projection synchronously.
     * Returns true if inserted, false if duplicate.
     */
-   public function append(array $event): bool
+   public function appendEvent(array $event): bool
    {
       // Use $wpdb->prepare for safety and wpdb->query for transactions
       $this->wpdb->query('START TRANSACTION');

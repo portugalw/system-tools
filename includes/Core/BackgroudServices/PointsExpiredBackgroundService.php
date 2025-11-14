@@ -2,6 +2,10 @@
 
 <?php
 
+namespace SystemToolsHelpInfanciaPoints\Core\BackgroundService;
+
+use SystemToolsHelpInfancia\Core\Services\PointsService;
+
 class PointsExpiredBackgroundService
 {
 
@@ -13,8 +17,8 @@ class PointsExpiredBackgroundService
       }
 
       add_action('st_points_check_expiration', function () {
-         $service = new \SystemToolsHelpInfanciaPoints\PointsProjectionService($GLOBALS['wpdb']);
-         $service->markBatchExpired();
+         $service = new PointsService($GLOBALS['wpdb']);
+         $service->markBatchExpired($GLOBALS['wpdb']);
       });
    }
 }
