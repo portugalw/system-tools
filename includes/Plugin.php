@@ -128,7 +128,17 @@ final class Plugin
          array($this, 'admin_page_usuario_debito_pontos_callback'), // Callback
          40,
          'dashicons-tickets-alt'
+      );
 
+      add_submenu_page(
+         'system_tools',
+         'Expirar Pontos',
+         'Expirar Pontos',
+         'manage_options',
+         'expire-plan-screen',
+         array($this, 'admin_page_usuario_expirar_pontos_callback'), // Callback
+         40,
+         'dashicons-tickets-alt'
       );
    }
 
@@ -151,10 +161,13 @@ final class Plugin
    {
       require_once ST_PAGE_ADMIN_DEBITO_PONTOS_USUARIO;
    }
+   function admin_page_usuario_expirar_pontos_callback()
+   {
+      require_once ST_PAGE_ADMIN_EXPIRAR_PONTOS_USUARIO;
+   }
    function admin_page_purchase_user_plan_callback()
    {
       require_once ST_PAGE_ADMIN_CADASTRO_PLANO_USUARIO;
-      // add_action('admin_post_save_purchase_plan', 'handle_form');
    }
 
 

@@ -175,6 +175,8 @@ class PointsService
       $user_id = (int)$event['aggregate_id'];
       $batch_id = (int)$payload['batch_id'];
       $expired_points = (int)$payload['expired_points'];
+      $allocation = ['batch_id' => $batch_id, 'expired_points' => $expired_points];
+      $source = (int)$payload['source'];
 
       if ($expired_points <= 0) {
          // Still mark batch expired if needed
@@ -208,7 +210,8 @@ class PointsService
          'type' => 'expire',
          'amount' => -$expired_points,
          'balance_after' => $balance_after,
-         'related_resource' => $batch_id
+         'related_resource' => $source,
+         'batch_afected' =>  wp_json_encode($allocation),
       ], ['%d', '%s', '%s', '%d', '%d', '%d']);
    }
 

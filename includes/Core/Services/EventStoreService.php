@@ -11,11 +11,13 @@ class EventStoreService
 {
    private $wpdb;
    private $eventStoreRepository;
+   private $prefix;
 
    public function __construct(\wpdb $wpdb)
    {
       $this->wpdb = $wpdb;
       $this->eventStoreRepository = new EventStoreRepository($wpdb);
+      $this->prefix = $wpdb->prefix;
    }
 
    function handle_purchase_plan($user_id, $plan_id)
@@ -53,6 +55,55 @@ class EventStoreService
       );
 
       return  $this->appendEvent($event);;
+   }
+
+
+   public function handle_expire_points($user_id,  $date)
+   {
+      $query = "SELECT * FROM {$this->prefix}st_points_batches
+             WHERE expires_at <= '$date' AND status = 'active' AND points_remaining > 0";
+
+      echo $query;
+
+      $expiredBatches = $this->wpdb->get_results($query);
+
+      $results = [];
+
+      foreach ($expiredBatches as $batch) {
+
+         echo $batch->points_remaining;
+
+         try {
+
+            $batch_id = (int)$batch->batch_id;
+            $expired_points = (int)$batch->points_remaining;
+
+            $payload = ['expired_points' => $expired_points, 'batch_id' => $batch_id, 'user_id' => $user_id, 'points' => $expired_points, 'source' => 'pontos_expirados'];
+            $meta = ['actor_id' => $user_id, 'ip' => $_SERVER['REMOTE_ADDR']];
+
+            $event = EventFactory::create(
+               'UserPoints',
+               $user_id,
+               'PointsExpired',
+               $payload,
+               $meta
+            );
+
+            $results[] = $this->appendEvent($event);
+         } catch (\Throwable $t) {
+
+            $msg = $t->getMessage();
+            echo $msg;
+            error_log("[Expire] Falha ao aplicar expiração: {$msg}");
+
+            $results[] =  [
+               'success' => false,
+               'message' => "Erro ao aplicar projeção: {$msg}"
+            ];
+         }
+      }
+
+      return $results;
    }
 
    /**
