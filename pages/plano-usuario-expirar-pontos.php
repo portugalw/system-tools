@@ -27,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['expire_points_form'])
          $results = $service->handle_expire_points($user_id,  $expire_date);
 
          foreach ($results as $result) {
+            echo 'dsad';
             echo $result;
             if ($result['success']) {
                $status = 'success';
@@ -40,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['expire_points_form'])
          echo $e->getMessage();
          $status = 'error';
          $message = "Erro ao expirar pontos: " . $e->getMessage();
+         echo $message;
          error_log("[ExpirePoints] " . $e->getMessage());
       }
    }

@@ -22,7 +22,7 @@ class EventStoreService
 
    function handle_purchase_plan($user_id, $plan_id)
    {
-      $points = 10; // regra
+      $points = 10; // regra TODO BUSCAR DE TABELA DE CONFIGURACAO
       $expires_at = date('Y-m-d H:i:s', strtotime('+30 days'));
 
       $payload = ['user_id' => $user_id, 'plan_id' => $plan_id, 'points' => $points, 'expires_at' => $expires_at, 'source' => 'plan_purchase'];
@@ -157,6 +157,7 @@ class EventStoreService
             $this->wpdb->query('ROLLBACK');
 
             $msg = $t->getMessage();
+            echo 'Falha ao aplicar projeção:';
             error_log("[Projection] Falha ao aplicar projeção: {$msg}");
 
             return [

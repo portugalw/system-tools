@@ -67,7 +67,7 @@ class PointsService
       if ($points <= 0) return;
 
       // Insert batch
-      $wpdb->insert("{$prefix}st_points_batches", [
+      $result = $wpdb->insert("{$prefix}st_points_batches", [
          'user_id' => $user_id,
          'origin_event_id' => $event['event_id'],
          'points_total' => $points,
@@ -76,8 +76,12 @@ class PointsService
          'metadata' => wp_json_encode($payload)
       ], ['%d', '%s', '%d', '%d', '%s', '%s']);
 
+      if ($result === false) {
+         throw new \Exception("Erro SQL: {$wpdb->last_error}");
+      }
+
       // Update balance (upsert)
-      $wpdb->query($wpdb->prepare("
+      $result = $wpdb->query($wpdb->prepare("
             INSERT INTO {$prefix}st_points_balance (user_id, available_points, total_earned, last_event_id)
             VALUES (%d, %d, %d, %s)
             ON DUPLICATE KEY UPDATE
@@ -86,10 +90,14 @@ class PointsService
                last_event_id = VALUES(last_event_id)
         ", $user_id, $points, $points, $event['event_id']));
 
+      if ($result === false) {
+         throw new \Exception("Erro SQL: {$wpdb->last_error}");
+      }
+
       // Insert transaction
       $balance_after = self::getUserBalance($wpdb, $user_id);
 
-      $wpdb->insert("{$prefix}st_points_transactions", [
+      $result = $wpdb->insert("{$prefix}st_points_transactions", [
          'user_id' => $user_id,
          'event_id' => $event['event_id'],
          'type' => 'credit',
@@ -97,6 +105,10 @@ class PointsService
          'balance_after' => $balance_after,
          'related_resource' => $payload['reference'] ?? null
       ], ['%d', '%s', '%s', '%d', '%d', '%s']);
+
+      if ($result === false) {
+         throw new \Exception("Erro SQL: {$wpdb->last_error}");
+      }
    }
 
    private static function applyConsume(\wpdb $wpdb, array $event)
@@ -133,11 +145,16 @@ class PointsService
          $take = min($b['points_remaining'], $remaining);
          $batch_id = $b['batch_id'];
          // decrement batch
-         $wpdb->query($wpdb->prepare("
+         $result =  $wpdb->query($wpdb->prepare("
                 UPDATE {$prefix}st_points_batches
                 SET points_remaining = GREATEST(points_remaining - %d, 0)
                 WHERE batch_id = %d
             ", $take, $batch_id));
+
+         if ($result === false) {
+            throw new \Exception("Erro SQL: {$wpdb->last_error}");
+         }
+
          $allocations[] = ['batch_id' => $batch_id, 'points' => $take];
          $remaining -= $take;
       }
@@ -147,17 +164,20 @@ class PointsService
 
 
       // Update balance
-      $wpdb->query($wpdb->prepare("
+      $result =  $wpdb->query($wpdb->prepare("
             UPDATE {$prefix}st_points_balance
             SET available_points = available_points - %d,
                 total_spent = total_spent + %d,
                 last_event_id = %s
             WHERE user_id = %d
         ", $points_to_consume, $points_to_consume, $event['event_id'], $user_id));
+      if ($result === false) {
+         throw new \Exception("Erro SQL: {$wpdb->last_error}");
+      }
 
       $balance_after = self::getUserBalance($wpdb, $user_id);
       // Insert transaction
-      $wpdb->insert("{$prefix}st_points_transactions", [
+      $result =  $wpdb->insert("{$prefix}st_points_transactions", [
          'user_id' => $user_id,
          'event_id' => $event_id,
          'type' => 'consume',
@@ -166,6 +186,10 @@ class PointsService
          'related_resource' => $payload['usage_id'] ?? null,
          'batch_afected' =>  wp_json_encode($allocations),
       ], ['%d', '%s', '%s', '%d', '%d', '%s', '%s']);
+
+      if ($result === false) {
+         throw new \Exception("Erro SQL: {$wpdb->last_error}");
+      }
    }
 
    private static function applyExpire(\wpdb $wpdb, array $event)
@@ -185,15 +209,19 @@ class PointsService
       }
 
       // Update batch (zero remaining, mark expired)
-      $wpdb->query($wpdb->prepare("
+      $result = $wpdb->query($wpdb->prepare("
             UPDATE {$prefix}st_points_batches
             SET points_remaining = 0,
                 status = 'expired'
             WHERE batch_id = %d
         ", $batch_id));
 
+      if ($result === false) {
+         throw new \Exception("Erro SQL: {$wpdb->last_error}");
+      }
+
       // Update balance
-      $wpdb->query($wpdb->prepare("
+      $result = $wpdb->query($wpdb->prepare("
             UPDATE {$prefix}st_points_balance
             SET available_points = GREATEST(available_points - %d, 0),
                 total_expired = total_expired + %d,
@@ -201,18 +229,25 @@ class PointsService
             WHERE user_id = %d
         ", $expired_points, $expired_points, $event['event_id'], $user_id));
 
+      if ($result === false) {
+         throw new \Exception("Erro SQL: {$wpdb->last_error}");
+      }
+
       $balance_after = self::getUserBalance($wpdb, $user_id);
 
-      // Insert transaction
-      $wpdb->insert("{$prefix}st_points_transactions", [
+      $result = $wpdb->insert("{$prefix}st_points_transactions", [
          'user_id' => $user_id,
          'event_id' => $event['event_id'],
          'type' => 'expire',
          'amount' => -$expired_points,
          'balance_after' => $balance_after,
-         'related_resource' => $source,
-         'batch_afected' =>  wp_json_encode($allocation),
-      ], ['%d', '%s', '%s', '%d', '%d', '%d']);
+         'related_resource' =>  $source,
+         'batch_afected' => wp_json_encode($allocation)
+      ], ['%d', '%s', '%s', '%d', '%d', '%s', '%s']);
+
+      if ($result === false) {
+         throw new \Exception("Erro SQL: {$wpdb->last_error}");
+      }
    }
 
    private static function applyCompensate(\wpdb $wpdb, array $event)
