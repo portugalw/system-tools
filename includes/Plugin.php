@@ -140,6 +140,17 @@ final class Plugin
          40,
          'dashicons-tickets-alt'
       );
+
+      add_submenu_page(
+         'system_tools',
+         'Lista de Usuários',
+         'Lista de Usuários',
+         'manage_options',
+         'list-users-details',
+         array($this, 'admin_page_list_user_plan_details_callback'), // Callback
+         40,
+         'dashicons-tickets-alt'
+      );
    }
 
    function admin_page_index_callback()
@@ -169,6 +180,12 @@ final class Plugin
    {
       require_once ST_PAGE_ADMIN_CADASTRO_PLANO_USUARIO;
    }
+
+   function admin_page_list_user_plan_details_callback()
+   {
+      require_once ST_PAGE_ADMIN_PLANO_USUARIOS_DETALHES;
+   }
+
 
 
 
