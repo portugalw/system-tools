@@ -1,0 +1,150 @@
+/* =========================================================
+   Admin Points – Material Style
+   ========================================================= */
+
+body {
+   font-family: 'Roboto', sans-serif;
+   background-color: #f0f2f5;
+   color: #333;
+}
+
+/* =======================
+   Header
+   ======================= */
+
+.admin-header {
+   background: linear-gradient(135deg, #1565C0 0%, #1E88E5 100%);
+   color: #fff;
+   padding: 40px 0 80px;
+   margin-bottom: -50px;
+   border-bottom-left-radius: 30px;
+   border-bottom-right-radius: 30px;
+}
+
+/* =======================
+   Cards
+   ======================= */
+
+.card {
+   border: none;
+   border-radius: 12px;
+   background: #fff;
+   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+   min-width: 100%!important;
+}
+
+/* =======================
+   Table
+   ======================= */
+
+.table-custom th {
+   font-weight: 600;
+   color: #555;
+   border-bottom: 2px solid #e0e0e0;
+   background: #fff;
+}
+
+.table-custom td {
+   padding: 15px;
+   vertical-align: middle;
+}
+
+/* =======================
+   User Cell
+   ======================= */
+
+.user-avatar {
+   width: 40px;
+   height: 40px;
+   background: #E3F2FD;
+   color: #1565C0;
+   border-radius: 50%;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   font-weight: 700;
+   margin-right: 10px;
+}
+
+/* =======================
+   Badges
+   ======================= */
+
+.badge-points {
+   background: #E8F5E9;
+   color: #2E7D32;
+   padding: 8px 14px;
+   border-radius: 20px;
+   font-weight: 600;
+}
+
+.badge-plan {
+   background: #E3F2FD;
+   color: #1565C0;
+   border: 1px solid #BBDEFB;
+}
+
+/* =======================
+   Modal
+   ======================= */
+
+.modal-content {
+   border-radius: 14px;
+   border: none;
+}
+
+.modal-header {
+   background: #1565C0;
+   color: #fff;
+   border-top-left-radius: 14px;
+   border-top-right-radius: 14px;
+}
+
+/* =======================
+   Stats
+   ======================= */
+
+.stat-box {
+   background: #F8F9FA;
+   border-radius: 10px;
+   padding: 20px;
+   text-align: center;
+   border-left: 4px solid #1565C0;
+}
+
+.stat-box.border-warning {
+   border-left-color: #F57C00;
+}
+
+.stat-value {
+   font-size: 2rem;
+   font-weight: 700;
+   color: #1565C0;
+}
+
+.stat-label {
+   font-size: 0.75rem;
+   color: #666;
+   text-transform: uppercase;
+   letter-spacing: 1px;
+}
+
+/* =======================
+   Animations
+   ======================= */
+
+.fade-in {
+   animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+   from {
+      opacity: 0;
+      transform: translateY(10px);
+   }
+
+   to {
+      opacity: 1;
+      transform: translateY(0);
+   }
+}

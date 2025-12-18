@@ -8,11 +8,13 @@ use SystemToolsHelpInfancia\Deactivate;
 
 defined('ABSPATH') || exit;
 
-define('ST_PLUGIN_STYLE_CSS', untrailingslashit(plugins_url('/assets/system-tools-style.css', ST_PLUGIN_FILE)));
-define('ST_PLUGIN_STYLE_ADMIN_LOGS_CSS', untrailingslashit(plugins_url('/assets/system-tools-admin-logs.css', ST_PLUGIN_FILE)));
+define('ST_PLUGIN_STYLE_CSS', untrailingslashit(plugins_url('/assets/css/system-tools-style.css', ST_PLUGIN_FILE)));
+define('ST_PLUGIN_STYLE_ADMIN_LOGS_CSS', untrailingslashit(plugins_url('/assets/css/system-tools-admin-logs.css', ST_PLUGIN_FILE)));
+define('ST_PLUGIN_STYLE_PLANO_USUARIO_CSS', untrailingslashit(plugins_url('/assets/css/plano-usuario.css', ST_PLUGIN_FILE)));
 
 
-define('ST_PLUGIN_SCRIPT_JS', untrailingslashit(plugins_url('/assets/system-tools-script.js', ST_PLUGIN_FILE)));
+define('ST_PLUGIN_SCRIPT_JS', untrailingslashit(plugins_url('/assets/js/system-tools-script.js', ST_PLUGIN_FILE)));
+define('ST_PLUGIN_SCRIPT_PLANO_USUARIO_JS', untrailingslashit(plugins_url('/assets/js/plano-usuario.js', ST_PLUGIN_FILE)));
 
 
 
@@ -73,9 +75,49 @@ final class Plugin
 
    function enqueue()
    {
+
+      // Bootstrap CSS
+      wp_enqueue_style(
+         'bootstrap-css',
+         'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
+         [],
+         '5.3.0'
+      );
+
+      // Bootstrap JS (IMPORTANTE!)
+      wp_enqueue_script(
+         'bootstrap-js',
+         'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
+         [],
+         '5.3.0',
+         true
+      );
+
+
       wp_enqueue_style('mypluginstyle', ST_PLUGIN_STYLE_CSS);
       wp_enqueue_style('stpluginstyleadminlogscss', ST_PLUGIN_STYLE_ADMIN_LOGS_CSS);
       wp_enqueue_script('mypluginscript', ST_PLUGIN_SCRIPT_JS);
+
+      wp_enqueue_script('st-admin-plano_usuario', ST_PLUGIN_SCRIPT_PLANO_USUARIO_JS,   ['bootstrap-js', 'jquery'],);
+
+      wp_localize_script('st-admin-plano_usuario', 'ST_AJAX', [
+         'url'   => admin_url('admin-ajax.php'),
+         'nonce' => wp_create_nonce('st_ajax_nonce')
+      ]);
+
+      wp_enqueue_style(
+         'st-admin-plano_usuario-css',
+         ST_PLUGIN_STYLE_PLANO_USUARIO_CSS,
+         [],
+         '1.0.0'
+      );
+
+      wp_enqueue_style(
+         'google-roboto',
+         'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap',
+         [],
+         null
+      );
    }
 
    function settings_link($plugin_actions, $plugin_file)

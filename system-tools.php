@@ -30,19 +30,26 @@ define('ST_PLUGIN_URL', untrailingslashit(plugin_dir_url(ST_PLUGIN_FILE)));
 $pagesPrefixFolder = ST_PLUGIN_PATH . '/pages';
 define('ST_PAGE_ADMIN_INDEX', $pagesPrefixFolder  . '/admin.php');
 define('ST_PAGE_ADMIN_CADASTRO_TEMPLATE_EMAIL', $pagesPrefixFolder  . '/cadastro-template-email.php');
-define('ST_PAGE_ADMIN_CADASTRO_PLANO_USUARIO', $pagesPrefixFolder  . '/plano-usuario-cadastro.php');
-define('ST_PAGE_ADMIN_DEBITO_PONTOS_USUARIO', $pagesPrefixFolder  . '/plano-usuario-debito-pontos.php');
-define('ST_PAGE_ADMIN_EXPIRAR_PONTOS_USUARIO', $pagesPrefixFolder  . '/plano-usuario-expirar-pontos.php');
-define('ST_PAGE_ADMIN_PLANO_USUARIOS_DETALHES', $pagesPrefixFolder  . '/plano-usuarios-detalhes.php');
+define('ST_PAGE_ADMIN_CADASTRO_PLANO_USUARIO', $pagesPrefixFolder  . '/plano-usuario/cadastro.php');
+define('ST_PAGE_ADMIN_DEBITO_PONTOS_USUARIO', $pagesPrefixFolder  . '/plano-usuario/debito-pontos.php');
+define('ST_PAGE_ADMIN_EXPIRAR_PONTOS_USUARIO', $pagesPrefixFolder  . '/plano-usuario/expirar-pontos.php');
+define('ST_PAGE_ADMIN_PLANO_USUARIOS_DETALHES', $pagesPrefixFolder  . '/plano-usuario/lista-detalhes.php');
+
 
 define('ST_PAGE_ADMIN_EVENT_LOG', $pagesPrefixFolder  . '/event-log-view.php');
 define('ST_PAGE_ADMIN_REQUEST_LOG', $pagesPrefixFolder  . '/request-log-view.php');
 
+$pagesActionPrefixFolder = ST_PLUGIN_PATH . '/page-actions';
+define('ST_PAGE_ACTION_ADMIN_PLANO_USUARIOS_DETALHES', $pagesActionPrefixFolder  . '/plano-usuarios-detalhes-actions.php');
 
+require_once ST_PAGE_ACTION_ADMIN_PLANO_USUARIOS_DETALHES;
 
 require_once ST_PLUGIN_PATH . '/includes/Plugin.php';
 require_once ST_PLUGIN_PATH . '/includes/Activate.php';
 require_once ST_PLUGIN_PATH . '/includes/Deactivate.php';
+
+
+
 
 
 //External
