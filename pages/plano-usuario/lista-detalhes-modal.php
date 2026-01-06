@@ -14,6 +14,7 @@ if (!defined('ABSPATH')) exit;
          <div class="modal-header bg-primary text-white">
             <h5 class="modal-title fw-bold">
                <i class="fas fa-user-circle me-2"></i>
+               <span>Detalhes do Usuário - </span>
                <span id="modalUserName">Carregando...</span>
             </h5>
             <button type="button"
@@ -53,6 +54,26 @@ if (!defined('ABSPATH')) exit;
                   </div>
                </div>
 
+               <!-- PLANO ATUAL -->
+               <div class="card border-0 shadow-sm">
+                  <h5 class="fw-bold m-0">
+                     <i cl5ass="fas fa-history me-2"></i>
+                     Plano Atual: <span id="nomePlanoAtual">PLANO TALL</span>
+                  </h5>
+                  <div class="mt-2">
+
+                     <h6>Membro desde: <span class="badge bg-secondary">DATA TAL</span></h6>
+                     <h6>Data do plano atual: <span class="badge bg-secondary">DATA TAL</span> Expira em: <span class="badge bg-secondary">DATA TAL</span></h6>
+                  </div>
+                  <div>
+
+                  </div>
+
+
+
+               </div>
+
+
                <!-- HISTÓRICO -->
                <div class="card border-0 shadow-sm">
                   <div class="card-body">
@@ -83,23 +104,76 @@ if (!defined('ABSPATH')) exit;
                   </div>
                </div>
 
+
+
+               <!-- HISTÓRICO -->
+               <div class="card border-0 shadow-sm">
+                  <div class="card-body">
+
+                     <div class="accordion" id="accordionExample">
+                        <div class="accordion-item">
+                           <h2 class="accordion-header" id="headingOne">
+                              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                 Adicionar Pontos
+                              </button>
+                           </h2>
+                           <div id="collapseOne" class="accordion-collapse collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                              <div class="accordion-body">
+
+                                 <div class="mb-3">
+                                    <div class="row">
+                                       <div class="col">
+                                          <label for="quantidade-add" class="form-label">Quantidade de Pontos:</label>
+                                          <input type="number" class="form-control " id="quantidade-add" value="10">
+                                          <div class="mt-1">
+                                             <label for="dias-expirar" class="form-label">Quantidade de Dias para expirar:</label>
+                                             <input type="number" class="form-control " id="dias-expirar" value="30">
+                                          </div>
+                                       </div>
+                                       <div class="col">
+                                          <label for="justificativa-add" class="form-label">Justificativa:</label>
+                                          <textarea class="form-control" id="justificativa-add" rows="2"></textarea>
+                                       </div>
+                                    </div>
+                                 </div>
+                                 <div class="mb-3">
+
+                                 </div>
+                                 <button type="submit" id="btnAddPontos" class="btn btn-primary">Adicionar Pontos</button>
+
+                              </div>
+                           </div>
+                        </div>
+                        <div class="accordion-item">
+                           <h2 class="accordion-header" id="headingTwo">
+                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                 Expirar Pontos
+                              </button>
+                           </h2>
+                           <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                              <div class="accordion-body">
+                                 <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- FOOTER -->
+               <div class="modal-footer bg-white">
+                  <button type="button"
+                     class="btn btn-secondary"
+                     data-bs-dismiss="modal">
+                     Fechar
+                  </button>
+
+                  <button type="button" class="btn btn-primary">
+                     <i class="fas fa-pen me-1"></i>
+                     Ajustar Saldo
+                  </button>
+               </div>
+
             </div>
          </div>
-
-         <!-- FOOTER -->
-         <div class="modal-footer bg-white">
-            <button type="button"
-               class="btn btn-secondary"
-               data-bs-dismiss="modal">
-               Fechar
-            </button>
-
-            <button type="button" class="btn btn-primary">
-               <i class="fas fa-pen me-1"></i>
-               Ajustar Saldo
-            </button>
-         </div>
-
       </div>
-   </div>
-</div>

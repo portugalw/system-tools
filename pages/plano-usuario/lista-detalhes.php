@@ -87,3 +87,4 @@ $users = $wpdb->get_results($sql);
 </div>
 
 <?php include __DIR__ . '\lista-detalhes-modal.php'; ?>
+<?php include plugin_dir_path(ST_PLUGIN_FILE) . 'pages/util/modal-confirmacao.php'; ?>

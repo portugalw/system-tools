@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.btn-view-client').forEach(btn => {
         btn.addEventListener('click', async () => {
             currentUserId = btn.dataset.userId;
-            el('modalUserName').innerText = btn.dataset.userName;
+      
+            el('modalUserName').innerText = btn.dataset.userName + ' ID:' + currentUserId;
 
             toggleLoading(true);
             modal.show();

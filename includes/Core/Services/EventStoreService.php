@@ -40,6 +40,27 @@ class EventStoreService
       return $this->appendEvent($event);
    }
 
+   function handle_add_points_admin($user_id, $points, $days_expires_at, $description)
+   {
+      // $points = 10; // regra TODO BUSCAR DE TABELA DE CONFIGURACAO
+      $expires_at = date('Y-m-d H:i:s', strtotime('+' . $days_expires_at . ' days'));
+
+      $payload = ['user_id' => $user_id, 'plan_id' => 9999, 'points' => $points, 'expires_at' => $expires_at, 'source' => 'admin_granted', 'description' => $description];
+      $meta = ['actor_id' => $user_id, 'ip' => $_SERVER['REMOTE_ADDR']];
+
+      $event = EventFactory::create(
+         'UserPoints',
+         $user_id,
+         'AdminGrantedPoints',
+         $payload,
+         $meta
+      );
+
+
+      return $this->appendEvent($event);
+   }
+
+
    function handle_consume_plan($user_id, $plan_id,  $points)
    {
 
