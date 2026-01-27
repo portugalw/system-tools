@@ -72,7 +72,7 @@ class Activate
          UNIQUE KEY uq_event_eventid (event_id),
          KEY idx_aggregate (aggregate_type, aggregate_id),
          KEY idx_created_at (created_at)
-         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+         )  $charset_collate;";
 
       dbDelta($sql_tabela_log_event);
 
@@ -87,7 +87,7 @@ class Activate
             total_expired INT NOT NULL DEFAULT 0,
             last_event_id CHAR(36) NULL,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+            )  $charset_collate;";
 
       dbDelta($sql_tabela_points_balance);
 
@@ -106,7 +106,7 @@ class Activate
          metadata JSON NULL,
          KEY idx_user_expires (user_id, expires_at),
          KEY idx_user_status (user_id, status)
-         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+         )  $charset_collate;";
 
       dbDelta($sql_tabela_points_batches);
 
@@ -127,7 +127,7 @@ class Activate
          created_user_id BIGINT UNSIGNED NOT NULL,
          KEY idx_user_created (user_id, created_at),
          KEY idx_event (event_id)
-         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+         )  $charset_collate;";
 
       dbDelta($sql_tabela_points_transactions);
 
@@ -144,8 +144,24 @@ class Activate
          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
          created_user_id BIGINT UNSIGNED NOT NULL,
          KEY idx_actor (actor_id)
-         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+         )  $charset_collate;";
 
       dbDelta($sql_tabela_st_audit_logs);
+
+      $tabela_st_plans_config =  $wpdb->prefix . 'st_plans_config';
+      $sql_tabela_st_plans_config =
+         "CREATE TABLE $tabela_st_plans_config (
+          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+         arm_subscription_plan_id int(11) NOT NULL,
+         points int(11) DEFAULT 0,
+         days_expire int(11) DEFAULT 30,
+         is_active tinyint(1) DEFAULT 1,
+         updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+         created_user_id BIGINT UNSIGNED NOT NULL,
+          UNIQUE KEY plan_id_unique (arm_subscription_plan_id)
+         )  $charset_collate;";
+
+      dbDelta($sql_tabela_st_plans_config);
    }
 }

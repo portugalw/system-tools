@@ -103,8 +103,9 @@ class PointsService
          'type' => 'credit',
          'amount' => $points,
          'balance_after' => $balance_after,
-         'related_resource' => $payload['reference'] ?? null
-      ], ['%d', '%s', '%s', '%d', '%d', '%s']);
+         'note' => $payload['description'] ?? null,
+         'related_resource' => $payload['source'] ?? null
+      ], ['%d', '%s', '%s', '%d', '%d', '%s', '%s']);
 
       if ($result === false) {
          throw new \Exception("Erro SQL: {$wpdb->last_error}");
@@ -264,7 +265,7 @@ class PointsService
    {
       $prefix = $wpdb->prefix;
       $res = $wpdb->get_row($wpdb->prepare("SELECT available_points FROM {$prefix}st_points_balance WHERE user_id = %d", $user_id));
-      echo $res->available_points;
+      //echo $res->available_points;
       return $res ? (int)$res->available_points : 0;
    }
 

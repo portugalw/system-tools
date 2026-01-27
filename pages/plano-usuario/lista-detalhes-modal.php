@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) exit;
    <div class="modal-dialog modal-xl modal-dialog-centered">
       <div class="modal-content shadow-xl">
 
+         <input type="hidden" id="id-usuario">
          <!-- HEADER -->
          <div class="modal-header bg-primary text-white">
             <h5 class="modal-title fw-bold">
@@ -36,43 +37,38 @@ if (!defined('ABSPATH')) exit;
             <div id="modalContent" class="d-none">
 
                <!-- STATS -->
-               <div class="row g-3 mb-4">
-                  <div class="col-md-6">
-                     <div class="stat-box">
-                        <div class="stat-value" id="viewBalance">0</div>
-                        <div class="stat-label">Saldo Atual</div>
-                     </div>
-                  </div>
+               <div class="card g-3 mb-4 border-0 shadow-sm">
+                  <div class="card-body">
+                     <div class="row">
+                        <div class="col-md-6">
+                           <h5 class="fw-bold m-0">
+                              <i cl5ass="fas fa-history me-2"></i>
+                              Plano Atual: <span id="nomePlanoAtual">PLANO TALL</span>
+                           </h5>
+                           <div class="mt-2">
 
-                  <div class="col-md-6">
-                     <div class="stat-box border-warning">
-                        <div class="stat-value text-warning" id="viewExpiring">0</div>
-                        <div class="stat-label">
-                           Expiram em <span id="viewExpiringDate">-</span>
+                              <h6>Membro desde: <span class="badge bg-secondary">DATA TAL</span></h6>
+                              <h6>Data do plano atual: <span class="badge bg-secondary">DATA TAL</span> Expira em: <span class="badge bg-secondary">DATA TAL</span></h6>
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="stat-box">
+                              <div class="stat-value" id="viewBalance">0</div>
+                              <div class="stat-label">Saldo Atual</div>
+                           </div>
+                        </div>
+
+                        <div class="col-md-3">
+                           <div class="stat-box border-warning">
+                              <div class="stat-value text-warning" id="viewExpiring">0</div>
+                              <div class="stat-label">
+                                 Expiram em <span id="viewExpiringDate">-</span>
+                              </div>
+                           </div>
                         </div>
                      </div>
                   </div>
                </div>
-
-               <!-- PLANO ATUAL -->
-               <div class="card border-0 shadow-sm">
-                  <h5 class="fw-bold m-0">
-                     <i cl5ass="fas fa-history me-2"></i>
-                     Plano Atual: <span id="nomePlanoAtual">PLANO TALL</span>
-                  </h5>
-                  <div class="mt-2">
-
-                     <h6>Membro desde: <span class="badge bg-secondary">DATA TAL</span></h6>
-                     <h6>Data do plano atual: <span class="badge bg-secondary">DATA TAL</span> Expira em: <span class="badge bg-secondary">DATA TAL</span></h6>
-                  </div>
-                  <div>
-
-                  </div>
-
-
-
-               </div>
-
 
                <!-- HISTÓRICO -->
                <div class="card border-0 shadow-sm">
@@ -90,9 +86,10 @@ if (!defined('ABSPATH')) exit;
                            <table class="table table-sm table-striped">
                               <thead>
                                  <tr>
-                                    <th>Data</th>
+                                    <th style="width: 190px">Data</th>
                                     <th>Tipo</th>
-                                    <th>Obs</th>
+                                    <th>Origem</th>
+                                    <th style="width: 370px">Obs</th>
                                     <th class="text-end">Valor</th>
                                  </tr>
                               </thead>

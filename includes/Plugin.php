@@ -15,6 +15,7 @@ define('ST_PLUGIN_STYLE_PLANO_USUARIO_CSS', untrailingslashit(plugins_url('/asse
 
 define('ST_PLUGIN_SCRIPT_JS', untrailingslashit(plugins_url('/assets/js/system-tools-script.js', ST_PLUGIN_FILE)));
 define('ST_PLUGIN_SCRIPT_PLANO_USUARIO_JS', untrailingslashit(plugins_url('/assets/js/plano-usuario.js', ST_PLUGIN_FILE)));
+define('ST_PLUGIN_SCRIPT_PLANO_CONFIGURACAO_VINCULO_JS', untrailingslashit(plugins_url('/assets/js/plano-configuracao-vinculo.js', ST_PLUGIN_FILE)));
 
 
 
@@ -98,12 +99,18 @@ final class Plugin
       wp_enqueue_style('stpluginstyleadminlogscss', ST_PLUGIN_STYLE_ADMIN_LOGS_CSS);
       wp_enqueue_script('mypluginscript', ST_PLUGIN_SCRIPT_JS);
 
-      wp_enqueue_script('st-admin-plano_usuario', ST_PLUGIN_SCRIPT_PLANO_USUARIO_JS,   ['bootstrap-js', 'jquery'],);
 
-      wp_localize_script('st-admin-plano_usuario', 'ST_AJAX', [
+      wp_localize_script('mypluginscript', 'ST_AJAX', [
          'url'   => admin_url('admin-ajax.php'),
          'nonce' => wp_create_nonce('st_ajax_nonce')
       ]);
+
+
+      wp_enqueue_script('st-admin-plano_usuario', ST_PLUGIN_SCRIPT_PLANO_USUARIO_JS,   ['mypluginscript', 'bootstrap-js', 'jquery'],);
+      wp_enqueue_script('st-admin-plano_configuracao_vinculo', ST_PLUGIN_SCRIPT_PLANO_CONFIGURACAO_VINCULO_JS,   ['mypluginscript', 'bootstrap-js', 'jquery'],);
+
+
+
 
       wp_enqueue_style(
          'st-admin-plano_usuario-css',

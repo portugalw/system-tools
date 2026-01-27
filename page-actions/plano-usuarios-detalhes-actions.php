@@ -77,11 +77,12 @@ function st_get_transactions()
    }
 
    $tb_transactions = $wpdb->prefix . 'st_points_transactions';
+   $tb_event_store = $wpdb->prefix . 'st_event_store';
 
    $rows = $wpdb->get_results(
       $wpdb->prepare("
-            SELECT *
-            FROM $tb_transactions
+            SELECT t.txn_id, t.user_id, t.type, t.note, t.related_resource, t.created_at, t.amount
+            FROM $tb_transactions t
             WHERE user_id = %d
             ORDER BY created_at DESC
             LIMIT 50
@@ -94,61 +95,68 @@ function st_get_transactions()
 
 function st_update_points()
 {
-   check_ajax_referer('st_points_nonce');
+
+   if (!current_user_can('manage_options')) {
+      wp_send_json_error(['message' => 'Sem permissão'], 403);
+   }
+
+   check_ajax_referer('st_ajax_nonce');
 
    global $wpdb;
 
-   $user_id   = intval($_POST['user_id'] ?? 0);
-   $amount    = intval($_POST['amount'] ?? 10);
-   $days_expire    = intval($_POST['days_expire'] ?? 30);
-   $note      = sanitize_textarea_field($_POST['note'] ?? '');
-   $operation = $_POST['operation'] ?? '';
+   $user_id  = intval($_POST['user_id'] ?? 0);
+   $amount   = intval($_POST['amount'] ?? 0);
+   $days_expire = intval($_POST['days_expire'] ?? 30);
+   $note     = sanitize_textarea_field($_POST['note'] ?? '');
+   $operation = sanitize_text_field($_POST['operation'] ?? '');
 
-   if (!$user_id || $amount <= 0 || !$note) {
-      wp_send_json_error('Dados inválidos.');
+   if (!$user_id || $amount <= 0 || empty($note)) {
+      wp_send_json_error(['message' => 'Dados inválidos.']);
    }
 
    if (!in_array($operation, ['add', 'remove'], true)) {
-      wp_send_json_error('Operação inválida.');
+      wp_send_json_error(['message' => 'Operação inválida.']);
    }
 
    if ($operation === 'remove') {
       $amount = -abs($amount);
    }
 
-
    try {
       $service = new EventStoreService($wpdb);
 
-      if ($operation == 'add') {
-         $result  = $service->handle_add_points_admin($user_id, $amount, $days_expire, $note);
-      } else if ($operation == 'remove') {
-         $result  = $service->handle_expire_points($user_id, null); // TODO
-      }
-
-
-      // Resultado padronizado: ['success'=>bool, 'message'=>string]
-      if (is_array($result) && isset($result['success'])) {
-
-         if ($result['success'] === true) {
-            $status  = 'success';
-            $message = $result['message'] ?? 'Compra registrada com sucesso!';
-         } else {
-            $status  = 'error';
-            $message = $result['message'] ?? 'Falha ao registrar a compra.';
-         }
+      if ($operation === 'add') {
+         $result = $service->handle_add_points_admin(
+            $user_id,
+            $amount,
+            $days_expire,
+            $note
+         );
       } else {
-         $status  = 'error';
-         $message = 'A resposta do servidor não é válida.';
-         error_log('[purchase_plan] Resposta inesperada do handle_purchase_plan');
+         $result = $service->handle_expire_points($user_id, null);
       }
+
+      if (!is_array($result) || !isset($result['success'])) {
+         error_log('[st_update_points] Resposta inválida do service');
+         wp_send_json_error([
+            'message' => 'Resposta inválida do servidor.'
+         ]);
+      }
+
+      if ($result['success'] === true) {
+         wp_send_json_success([
+            'message' => $result['message'] ?? 'Pontos atualizados com sucesso.'
+         ]);
+      }
+
+      wp_send_json_error([
+         'message' => $result['message'] ?? 'Falha ao atualizar pontos.'
+      ]);
    } catch (Throwable $t) {
-      $status  = 'error';
-      $message = 'Erro inesperado: ' . $t->getMessage();
+      error_log('[st_update_points] Erro: ' . $t->getMessage());
 
-      // Log detalhado para debugging
-      error_log('[purchase_plan] Erro crítico ao processar compra: ' . $t->getMessage());
+      wp_send_json_error([
+         'message' => 'Erro inesperado: ' . $t->getMessage()
+      ]);
    }
-
-   wp_send_json_success(true);
 }

@@ -92,7 +92,7 @@ class EventStoreService
 
       foreach ($expiredBatches as $batch) {
 
-         echo $batch->points_remaining;
+         // echo $batch->points_remaining;
 
          try {
 
