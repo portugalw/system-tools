@@ -163,7 +163,7 @@ final class Plugin
          'manage_options',
          'purchase-plan-screen',
          array($this, 'admin_page_purchase_user_plan_callback'), // Callback
-         40,
+         97,
          'dashicons-tickets-alt'
 
       );
@@ -175,7 +175,7 @@ final class Plugin
          'manage_options',
          'debit-plan-screen',
          array($this, 'admin_page_usuario_debito_pontos_callback'), // Callback
-         40,
+         98,
          'dashicons-tickets-alt'
       );
 
@@ -186,7 +186,18 @@ final class Plugin
          'manage_options',
          'expire-plan-screen',
          array($this, 'admin_page_usuario_expirar_pontos_callback'), // Callback
-         40,
+         99,
+         'dashicons-tickets-alt'
+      );
+
+      add_submenu_page(
+         'system_tools',
+         'Configurar Plano',
+         'Configurar Plano',
+         'manage_options',
+         'plan-config-attach',
+         array($this, 'admin_page_plan_config_attach_callback'), // Callback
+         39,
          'dashicons-tickets-alt'
       );
 
@@ -234,6 +245,12 @@ final class Plugin
    {
       require_once ST_PAGE_ADMIN_PLANO_USUARIOS_DETALHES;
    }
+
+   function admin_page_plan_config_attach_callback()
+   {
+      require_once ST_PAGE_ADMIN_PLANO_CONFIGURACAO_VINCULO;
+   }
+
 
 
 

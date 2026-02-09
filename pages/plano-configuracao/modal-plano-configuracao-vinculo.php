@@ -19,7 +19,7 @@
                   <label for="conf_points" class="form-label fw-bold">Pontos a conceder</label>
                   <div class="input-group">
                      <span class="input-group-text"><i class="fas fa-star"></i></span>
-                     <input type="number" class="form-control" id="conf_points" name="points" min="0" required>
+                     <input type="number" class="form-control" id="conf_points" name="points" min="1" required>
                   </div>
                   <div class="form-text">Quantidade de pontos ao assinar este plano.</div>
                </div>
@@ -35,7 +35,7 @@
 
                <div class="mb-3 pt-2 border-top">
                   <div class="form-check form-switch">
-                     <input class="form-check-input" type="checkbox" id="conf_active" name="is_active" value="1">
+                     <input class="form-check-input" type="checkbox" id="conf_active" name="is_active">
                      <label class="form-check-label fw-bold" for="conf_active">Configuração Ativa?</label>
                   </div>
                   <div class="form-text">Se desativado, o plugin ignorará a regra de pontos para este plano.</div>

@@ -121,15 +121,15 @@ if (!defined('ABSPATH')) exit;
                                     <div class="row">
                                        <div class="col">
                                           <label for="quantidade-add" class="form-label">Quantidade de Pontos:</label>
-                                          <input type="number" class="form-control " id="quantidade-add" value="10">
+                                          <input type="number" min="1" class="form-control " id="quantidade-add" value="10">
                                           <div class="mt-1">
                                              <label for="dias-expirar" class="form-label">Quantidade de Dias para expirar:</label>
-                                             <input type="number" class="form-control " id="dias-expirar" value="30">
+                                             <input type="number" min="1" class="form-control " id="dias-expirar" value="30">
                                           </div>
                                        </div>
                                        <div class="col">
                                           <label for="justificativa-add" class="form-label">Justificativa:</label>
-                                          <textarea class="form-control" id="justificativa-add" rows="2"></textarea>
+                                          <textarea class="form-control" minlength="10" id="justificativa-add" rows="2"></textarea>
                                        </div>
                                     </div>
                                  </div>

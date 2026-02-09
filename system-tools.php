@@ -34,6 +34,7 @@ define('ST_PAGE_ADMIN_CADASTRO_PLANO_USUARIO', $pagesPrefixFolder  . '/plano-usu
 define('ST_PAGE_ADMIN_DEBITO_PONTOS_USUARIO', $pagesPrefixFolder  . '/plano-usuario/debito-pontos.php');
 define('ST_PAGE_ADMIN_EXPIRAR_PONTOS_USUARIO', $pagesPrefixFolder  . '/plano-usuario/expirar-pontos.php');
 define('ST_PAGE_ADMIN_PLANO_USUARIOS_DETALHES', $pagesPrefixFolder  . '/plano-usuario/lista-detalhes.php');
+define('ST_PAGE_ADMIN_PLANO_CONFIGURACAO_VINCULO', $pagesPrefixFolder  . '/plano-configuracao/plano-configuracao-vinculo.php');
 
 
 define('ST_PAGE_ADMIN_EVENT_LOG', $pagesPrefixFolder  . '/event-log-view.php');
@@ -41,8 +42,10 @@ define('ST_PAGE_ADMIN_REQUEST_LOG', $pagesPrefixFolder  . '/request-log-view.php
 
 $pagesActionPrefixFolder = ST_PLUGIN_PATH . '/page-actions';
 define('ST_PAGE_ACTION_ADMIN_PLANO_USUARIOS_DETALHES', $pagesActionPrefixFolder  . '/plano-usuarios-detalhes-actions.php');
+define('ST_PAGE_ACTION_ADMIN_PLANO_CONFIGURACAO', $pagesActionPrefixFolder  . '/plano-configuracao-vinculo-actions.php');
 
 require_once ST_PAGE_ACTION_ADMIN_PLANO_USUARIOS_DETALHES;
+require_once ST_PAGE_ACTION_ADMIN_PLANO_CONFIGURACAO;
 
 require_once ST_PLUGIN_PATH . '/includes/Plugin.php';
 require_once ST_PLUGIN_PATH . '/includes/Activate.php';

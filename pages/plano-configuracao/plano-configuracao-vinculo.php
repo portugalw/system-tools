@@ -72,26 +72,26 @@ $plans = $wpdb->get_results($sql);
                      $days   = $has_config ? $plan->days_expire : 30;
                      $active = $has_config ? (int)$plan->is_active : 1; // Padrão ativo se for criar novo
                ?>
-                     <tr>
+                     <tr data-plan-id="<?= $plan->plan_id ?>">
                         <td>#<?= $plan->plan_id ?></td>
                         <td>
                            <strong><?= esc_html($plan->plan_name) ?></strong>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center col-points">
                            <?php if ($has_config): ?>
-                              <span class="badge bg-info text-dark"><?= $points ?> pts</span>
+                              <span class="badge bg-info text-dark "><?= $points ?> pts</span>
                            <?php else: ?>
                               <span class="text-muted">-</span>
                            <?php endif; ?>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center col-days">
                            <?php if ($has_config): ?>
                               <?= $days ?> dias
                            <?php else: ?>
                               <span class="text-muted">-</span>
                            <?php endif; ?>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center col-status">
                            <?php if (!$has_config): ?>
                               <span class="badge bg-secondary">Sem Config</span>
                            <?php elseif ($active): ?>
@@ -100,7 +100,7 @@ $plans = $wpdb->get_results($sql);
                               <span class="badge bg-danger">Desativado</span>
                            <?php endif; ?>
                         </td>
-                        <td class="text-muted small">
+                        <td class="text-muted small col-updated">
                            <?= $plan->updated_at ? date('d/m/Y H:i', strtotime($plan->updated_at)) : '-' ?>
                         </td>
                         <td class="text-end">
@@ -126,5 +126,5 @@ $plans = $wpdb->get_results($sql);
    </div>
 </div>
 
-<?php include __DIR__ . '/modal-plano-configuracao-vinculo.php'; ?>
-<script src="<?= plugin_dir_url(__FILE__) . 'js/plano-configuracao-vinculo.js' ?>"></script>
+<?php include __DIR__ . '\modal-plano-configuracao-vinculo.php'; ?>
+<?php include plugin_dir_path(ST_PLUGIN_FILE) . 'pages/util/modal-confirmacao.php'; ?>
