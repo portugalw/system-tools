@@ -12,10 +12,14 @@ define('ST_PLUGIN_STYLE_CSS', untrailingslashit(plugins_url('/assets/css/system-
 define('ST_PLUGIN_STYLE_ADMIN_LOGS_CSS', untrailingslashit(plugins_url('/assets/css/system-tools-admin-logs.css', ST_PLUGIN_FILE)));
 define('ST_PLUGIN_STYLE_PLANO_USUARIO_CSS', untrailingslashit(plugins_url('/assets/css/plano-usuario.css', ST_PLUGIN_FILE)));
 
+define('ST_PLUGIN_STYLE_PUBLIC_PLANO_USUARIO_EXTRATO_CSS', untrailingslashit(plugins_url('/assets/css/public-plano-usuario-extrato.css', ST_PLUGIN_FILE)));
+
 
 define('ST_PLUGIN_SCRIPT_JS', untrailingslashit(plugins_url('/assets/js/system-tools-script.js', ST_PLUGIN_FILE)));
 define('ST_PLUGIN_SCRIPT_PLANO_USUARIO_JS', untrailingslashit(plugins_url('/assets/js/plano-usuario.js', ST_PLUGIN_FILE)));
 define('ST_PLUGIN_SCRIPT_PLANO_CONFIGURACAO_VINCULO_JS', untrailingslashit(plugins_url('/assets/js/plano-configuracao-vinculo.js', ST_PLUGIN_FILE)));
+
+define('ST_PLUGIN_SCRIPT_PUBLIC_PLANO_USUARIO_EXTRATO_JS', untrailingslashit(plugins_url('/assets/js/public-plano-usuario-extrato.js', ST_PLUGIN_FILE)));
 
 
 
@@ -33,8 +37,8 @@ final class Plugin
 
    public function register()
    {
-      add_action('admin_enqueue_scripts', array($this, 'enqueue'));
-      //add_action('wp_enqueue_scripts', array($this, 'enqueue')); // FRONTEND
+      add_action('admin_enqueue_scripts', array($this, 'enqueue_admin'));
+      add_action('wp_enqueue_scripts', array($this, 'enqueue_public')); // FRONTEND
 
       add_action('admin_menu', array($this, 'add_admin_pages'));
 
@@ -74,9 +78,8 @@ final class Plugin
       echo 'uninstalled';
    }
 
-   function enqueue()
+   function enqueueCommon()
    {
-
       // Bootstrap CSS
       wp_enqueue_style(
          'bootstrap-css',
@@ -94,23 +97,35 @@ final class Plugin
          true
       );
 
-
       wp_enqueue_style('mypluginstyle', ST_PLUGIN_STYLE_CSS);
-      wp_enqueue_style('stpluginstyleadminlogscss', ST_PLUGIN_STYLE_ADMIN_LOGS_CSS);
-      wp_enqueue_script('mypluginscript', ST_PLUGIN_SCRIPT_JS);
-
 
       wp_localize_script('mypluginscript', 'ST_AJAX', [
          'url'   => admin_url('admin-ajax.php'),
          'nonce' => wp_create_nonce('st_ajax_nonce')
       ]);
+   }
 
+   function enqueue_public()
+   {
+      $this->enqueueCommon();
+
+      //public user
+      wp_enqueue_style('stpluginstylepublicplanousuarioextratocss', ST_PLUGIN_STYLE_PUBLIC_PLANO_USUARIO_EXTRATO_CSS);
+
+      wp_enqueue_script('st-public-plano-usuario-extrato-js', ST_PLUGIN_SCRIPT_PUBLIC_PLANO_USUARIO_EXTRATO_JS,   ['mypluginscript', 'bootstrap-js', 'jquery'],);
+   }
+
+   function enqueue_admin()
+   {
+
+      $this->enqueueCommon();
+
+      wp_enqueue_style('stpluginstyleadminlogscss', ST_PLUGIN_STYLE_ADMIN_LOGS_CSS);
+
+      wp_enqueue_script('mypluginscript', ST_PLUGIN_SCRIPT_JS);
 
       wp_enqueue_script('st-admin-plano_usuario', ST_PLUGIN_SCRIPT_PLANO_USUARIO_JS,   ['mypluginscript', 'bootstrap-js', 'jquery'],);
       wp_enqueue_script('st-admin-plano_configuracao_vinculo', ST_PLUGIN_SCRIPT_PLANO_CONFIGURACAO_VINCULO_JS,   ['mypluginscript', 'bootstrap-js', 'jquery'],);
-
-
-
 
       wp_enqueue_style(
          'st-admin-plano_usuario-css',

@@ -40,12 +40,26 @@ define('ST_PAGE_ADMIN_PLANO_CONFIGURACAO_VINCULO', $pagesPrefixFolder  . '/plano
 define('ST_PAGE_ADMIN_EVENT_LOG', $pagesPrefixFolder  . '/event-log-view.php');
 define('ST_PAGE_ADMIN_REQUEST_LOG', $pagesPrefixFolder  . '/request-log-view.php');
 
+define('ST_PAGE_PUBLIC_PLANO_USUARIO_EXTRATO', $pagesPrefixFolder  . '/public/plano-usuario/extrato.php');
+
 $pagesActionPrefixFolder = ST_PLUGIN_PATH . '/page-actions';
 define('ST_PAGE_ACTION_ADMIN_PLANO_USUARIOS_DETALHES', $pagesActionPrefixFolder  . '/plano-usuarios-detalhes-actions.php');
 define('ST_PAGE_ACTION_ADMIN_PLANO_CONFIGURACAO', $pagesActionPrefixFolder  . '/plano-configuracao-vinculo-actions.php');
 
+define('ST_PAGE_ACTION_PUBLIC_PLANO_USUARIO_EXTRATO', $pagesActionPrefixFolder  . '/public/plano-usuario-extrato-actions.php');
+
+
+$shortCodesPrefixFolder = ST_PLUGIN_PATH . '/includes/short-codes';
+define('ST_SHORT_CODE_PUBLIC_PLANO_USUARIO_EXTRATO', $shortCodesPrefixFolder  . '/public/short-code-extrato-perfil-usuario.php');
+define('ST_SHORT_CODE_PUBLIC_EMBED_FORMULARIO_HELP_INFANCIA', $shortCodesPrefixFolder  . '/public/short-code-formulario-help-infancia.php');
+
 require_once ST_PAGE_ACTION_ADMIN_PLANO_USUARIOS_DETALHES;
 require_once ST_PAGE_ACTION_ADMIN_PLANO_CONFIGURACAO;
+require_once ST_PAGE_ACTION_PUBLIC_PLANO_USUARIO_EXTRATO;
+
+require_once ST_SHORT_CODE_PUBLIC_PLANO_USUARIO_EXTRATO;
+require_once ST_SHORT_CODE_PUBLIC_EMBED_FORMULARIO_HELP_INFANCIA;
+
 
 require_once ST_PLUGIN_PATH . '/includes/Plugin.php';
 require_once ST_PLUGIN_PATH . '/includes/Activate.php';
