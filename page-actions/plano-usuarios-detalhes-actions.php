@@ -6,8 +6,13 @@ use SystemToolsHelpInfancia\Core\Services\EventStoreService;
 
 //add_action('wp_ajax_nopriv_get_client_details', 'st_get_client_details');
 add_action('wp_ajax_get_client_details', 'st_get_client_details');
-//add_action('wp_ajax_nopriv_get_transactions', 'st_get_transactions');
+
 add_action('wp_ajax_get_transactions', 'st_get_transactions');
+
+
+add_action('wp_ajax_nopriv_get_transactions_from_logged_user', 'st_get_transactions_from_logged_user');
+//add_action('wp_ajax_nopriv_get_transactions', 'st_get_transactions');
+
 
 add_action('wp_ajax_st_update_points', 'st_update_points');
 
@@ -59,6 +64,14 @@ function st_get_client_details()
    ]);
 }
 
+function st_get_transactions_from_logged_user()
+{
+
+   $rows = getTransactions(get_current_user_id());
+
+   wp_send_json_success($rows);
+}
+
 
 function st_get_transactions()
 {
@@ -69,13 +82,21 @@ function st_get_transactions()
 
    check_ajax_referer('st_ajax_nonce');
 
-   global $wpdb;
+
 
    $user_id = intval($_GET['user_id'] ?? 0);
    if (!$user_id) {
       wp_send_json_error('Usuário inválido', 400);
    }
 
+   $rows = getTransactions($user_id);
+
+   wp_send_json_success($rows);
+}
+
+function getTransactions($user_id)
+{
+   global $wpdb;
    $tb_transactions = $wpdb->prefix . 'st_points_transactions';
    $tb_event_store = $wpdb->prefix . 'st_event_store';
 
@@ -88,8 +109,6 @@ function st_get_transactions()
             LIMIT 50
         ", $user_id)
    );
-
-   wp_send_json_success($rows);
 }
 
 

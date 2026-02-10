@@ -21,14 +21,12 @@ jQuery(function ($) {
 
 
     /* --- Carregar extrato via AJAX --- */
-    function carregarExtrato(page = 1) {
+    async function carregarExtrato(page = 1) {
 
-        $.post(ST_EXTRATO.ajaxurl, {
-            action: "get_extrato",
-            page,
-            operacao: $("#filtro-operacao").val(),
-            _ajax_nonce: ST_EXTRATO.nonce
-        }, function (res) {
+
+      const res = await window.ST.fetchJson('get_transactions_from_logged_user');
+
+      console.log(res);
 
             if (!res.success) return;
 
@@ -46,7 +44,6 @@ jQuery(function ($) {
 
             $("#tab-extrato tbody").html(html);
             $("#paginacao-extrato").html(res.data.paginacao);
-        });
     }
 
     carregarExtrato(1);

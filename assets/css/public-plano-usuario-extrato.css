@@ -1,7 +1,7 @@
 /* -------- GLOBAL WRAPPER -------- */
 .st-extrato {
    font-family: Arial, sans-serif;
-   max-width: 1200px;
+   max-width: 1200px!important;
    margin: 0 auto;
    padding: 20px;
    color: #333;

@@ -2,29 +2,29 @@
 
    <h2 class="st-title">Extrato</h2>
 
-   <!-- CARD SUPERIOR -->
+   <!-- CARDS SUPERIORES -->
    <div class="st-cards">
 
       <div class="st-card">
          <div class="st-card-label">Total de pontos</div>
-         <div class="st-card-value">16.554</div>
+         <div class="st-card-value" id="st-total-pontos">10</div>
          <div class="st-card-update">
             <span class="dot"></span>
-            Atualizado em 09/02/2026, às 21:16
+            <span id="st-data-atualizacao"></span>
          </div>
       </div>
 
       <div class="st-card">
          <div class="st-card-label">Pontos a expirar</div>
-         <div class="st-card-value">3.900</div>
-         <div class="st-card-sub">A partir de 01/06/2026</div>
-         <button class="st-btn-outline">Ver detalhes</button>
+         <div class="st-card-value" id="st-expirar-total">45</div>
+         <div class="st-card-sub" id="st-expirar-data"></div>
+         <button class="st-btn-outline st-btn-expirar">Ver detalhes</button>
       </div>
 
       <div class="st-card">
-         <div class="st-card-label">Pontos a receber</div>
-         <div class="st-card-value">200</div>
-         <div class="st-card-sub">A partir de 14/02/2026</div>
+         <div class="st-card-label">Pontos Utilizados</div>
+         <div class="st-card-value" id="st-receber-total">0</div>
+         <div class="st-card-sub" id="st-receber-data"></div>
          <button class="st-btn-outline">Ver detalhes</button>
       </div>
 
@@ -37,30 +37,25 @@
 
    </div>
 
-   <!-- FILTROS -->
-   <h3 class="st-subtitle">Movimentações</h3>
-
-   <div class="st-filters">
-      <select>
-         <option>1 Ano</option>
-      </select>
-
-      <select>
-         <option>Filtrar por operação</option>
-      </select>
-
-      <select>
-         <option>Filtrar por parceiros</option>
-      </select>
-
-      <div class="st-filter-links">
-         <a href="#">Receber meus pontos</a>
-         <a href="#">Importante</a>
-      </div>
+   <!-- ABAS -->
+   <div class="st-tabs">
+      <button class="st-tab active" data-tab="mov">Movimentações</button>
+      <button class="st-tab" data-tab="exp">Pontos a expirar</button>
    </div>
 
-   <!-- TABELA -->
-   <div class="st-table-wrapper">
+   <!-- FILTRO (SÓ NA ABA MOVIMENTAÇÕES) -->
+   <div id="st-filtros-mov" class="st-filters">
+      <select id="st-filtro-tipo">
+         <option value="todos">Tudo</option>
+         <option value="recebidos">Pontos Recebidos</option>
+         <option value="gastos">Pontos Gastos</option>
+         <option value="expirados">Pontos Expirados</option>
+      </select>
+   </div>
+
+   <!-- TABELA: MOVIMENTAÇÕES -->
+   <div id="st-tab-mov" class="st-table-wrapper">
+
       <table class="st-table">
          <thead>
             <tr>
@@ -109,6 +104,24 @@
                <td>Expira em 08/12/2027</td>
             </tr>
 
+         </tbody>
+      </table>
+      <div id="st-paginacao-mov"></div>
+   </div>
+
+   <!-- TABELA: PONTOS A EXPIRAR -->
+   <div id="st-tab-exp" class="st-table-wrapper" style="display:none;">
+      <table class="st-table">
+         <thead>
+            <tr>
+               <th>Data de expiração</th>
+               <th>Quantidade</th>
+            </tr>
+         </thead>
+         <tbody id="st-tbody-exp">
+            <tr>
+               <td colspan="2">Carregando…</td>
+            </tr>
          </tbody>
       </table>
    </div>

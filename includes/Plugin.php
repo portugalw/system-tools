@@ -80,6 +80,8 @@ final class Plugin
 
    function enqueueCommon()
    {
+      wp_enqueue_script('mypluginscript', ST_PLUGIN_SCRIPT_JS);
+
       // Bootstrap CSS
       wp_enqueue_style(
          'bootstrap-css',
@@ -108,11 +110,6 @@ final class Plugin
    function enqueue_public()
    {
       $this->enqueueCommon();
-
-      //public user
-      wp_enqueue_style('stpluginstylepublicplanousuarioextratocss', ST_PLUGIN_STYLE_PUBLIC_PLANO_USUARIO_EXTRATO_CSS);
-
-      wp_enqueue_script('st-public-plano-usuario-extrato-js', ST_PLUGIN_SCRIPT_PUBLIC_PLANO_USUARIO_EXTRATO_JS,   ['mypluginscript', 'bootstrap-js', 'jquery'],);
    }
 
    function enqueue_admin()
@@ -122,7 +119,7 @@ final class Plugin
 
       wp_enqueue_style('stpluginstyleadminlogscss', ST_PLUGIN_STYLE_ADMIN_LOGS_CSS);
 
-      wp_enqueue_script('mypluginscript', ST_PLUGIN_SCRIPT_JS);
+
 
       wp_enqueue_script('st-admin-plano_usuario', ST_PLUGIN_SCRIPT_PLANO_USUARIO_JS,   ['mypluginscript', 'bootstrap-js', 'jquery'],);
       wp_enqueue_script('st-admin-plano_configuracao_vinculo', ST_PLUGIN_SCRIPT_PLANO_CONFIGURACAO_VINCULO_JS,   ['mypluginscript', 'bootstrap-js', 'jquery'],);
