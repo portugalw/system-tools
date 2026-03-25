@@ -12,6 +12,8 @@ $search_query = isset($_GET['logsearch']) ? sanitize_text_field($_GET['logsearch
 $evento       = isset($_GET['evento']) ? sanitize_text_field($_GET['evento']) : '';
 $origem       = isset($_GET['origem']) ? sanitize_text_field($_GET['origem']) : '';
 $descricao        = isset($_GET['descricao']) ? sanitize_text_field($_GET['descricao']) : '';
+$log_level        = isset($_GET['log_level']) ? sanitize_text_field($_GET['log_level']) : '';
+
 
 // Monta consulta base
 $query = "SELECT * FROM $nome_tabela WHERE 1=1";
@@ -19,7 +21,8 @@ $query = "SELECT * FROM $nome_tabela WHERE 1=1";
 // Filtro de pesquisa geral
 if (!empty($search_query)) {
    $query .= $wpdb->prepare(
-      " AND (event LIKE %s OR description LIKE %s OR origin LIKE %s OR description LIKE %s)",
+      " AND (event LIKE %s OR description LIKE %s OR origin LIKE %s OR description LIKE %s OR type LIKE %s)",
+      "%$search_query%",
       "%$search_query%",
       "%$search_query%",
       "%$search_query%",
@@ -36,6 +39,9 @@ if (!empty($origem)) {
 }
 if (!empty($descricao)) {
    $query .= $wpdb->prepare(" AND description LIKE %s", "%$descricao%");
+}
+if (!empty($log_level)) {
+   $query .= $wpdb->prepare(" AND type LIKE %s", "%$log_level%");
 }
 
 // Ordena por mais recente
@@ -61,6 +67,12 @@ $total_logs = count($logs);
 
       <div class="filter-fields">
          <input type="text" name="logsearch" value="<?= esc_attr($search_query); ?>" placeholder="Pesquisar logs...">
+         <select name="log_level" id="log-level" value="<?= esc_attr($log_level); ?>">
+            <option value="">Tipo Log</option>
+            <option value="INFO">INFO</option>
+            <option value="ERROR">ERROR</option>
+            <option value="WARN">WARN</option>
+         </select>
          <input type="text" name="evento" value="<?= esc_attr($evento); ?>" placeholder="Evento">
          <input type="text" name="origem" value="<?= esc_attr($origem); ?>" placeholder="Origem">
          <input type="text" name="descricao" value="<?= esc_attr($descricao); ?>" placeholder="Descrição">
@@ -80,6 +92,7 @@ $total_logs = count($logs);
          <tr>
             <th width="5%">ID</th>
             <th width="10%">Data</th>
+            <th width="5%%">Tipo</th>
             <th width="20%">Evento</th>
             <th width="15%">Origem</th>
             <th width="20%">E-mail</th>
@@ -92,6 +105,7 @@ $total_logs = count($logs);
                <tr>
                   <td><strong><?= esc_html($log->id); ?></strong></td>
                   <td><?= esc_html($log->date); ?></td>
+                  <td><?= esc_html($log->type); ?></td>
                   <td><?= esc_html($log->event); ?></td>
                   <td><?= esc_html($log->origin); ?></td>
                   <td><?= esc_html($log->customer_email); ?></td>

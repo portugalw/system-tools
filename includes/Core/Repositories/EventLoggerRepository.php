@@ -3,7 +3,7 @@
 
 namespace SystemToolsHelpInfancia\Core\Repositories;
 
-class EventLogger
+class EventLoggerRepository
 {
    private $wpdb;
    private $table;
@@ -14,7 +14,7 @@ class EventLogger
       $this->table = $wpdb->prefix . 'log_event';
    }
 
-   function log($event, $description, $origin, $customer_email = '')
+   function log($event, $description, $origin, $type, $customer_email = '')
    {
 
       $this->wpdb->insert(
@@ -23,7 +23,8 @@ class EventLogger
             'event' => $event,
             'description' => $description,
             'origin' => $origin,
-            'customer_email' => $customer_email
+            'customer_email' => $customer_email,
+            'type' => $type
          ],
          [
             '%s', // Tipo para "event"

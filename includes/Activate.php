@@ -48,6 +48,7 @@ class Activate
         description longtext NOT NULL,
         customer_email varchar(150) NULL,
         origin varchar(400) NULL,
+        type varchar(50) NULL default 'INFO',
         PRIMARY KEY  (id)
     ) $charset_collate;";
 
@@ -57,7 +58,7 @@ class Activate
 
       /**POINTS EVENT TABLE **/
       $tabela_st_event_store =  $wpdb->prefix . 'st_event_store';
-      $sql_tabela_log_event =
+      $sql_tabela_event_store =
          "CREATE TABLE $tabela_st_event_store (
          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
          event_id CHAR(36) NOT NULL, -- UUID v4
@@ -74,7 +75,7 @@ class Activate
          KEY idx_created_at (created_at)
          )  $charset_collate;";
 
-      dbDelta($sql_tabela_log_event);
+      dbDelta($sql_tabela_event_store);
 
       $tabela_st_points_balance =  $wpdb->prefix . 'st_points_balance';
       $sql_tabela_points_balance =

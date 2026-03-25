@@ -3,7 +3,7 @@
 namespace SystemToolsHelpInfancia\Adapters;
 
 use SystemToolsHelpInfancia\Util;
-use SystemToolsHelpInfancia\Core\EventLogger;
+use SystemToolsHelpInfancia\Core\Log\EventLogger;
 
 
 class SystemeAdapter
@@ -53,13 +53,13 @@ class SystemeAdapter
       if (curl_errno($ch)) {
          $error = curl_error($ch);
          curl_close($ch);
-         EventLogger::log('enviarDadosSysteme-erro', $dadosAluno . $error, $origin);
+         EventLogger::LogError('enviarDadosSysteme-erro', $dadosAluno . $error, $origin);
          return ["success" => false, "error" => $error];
       }
 
       // Fecha o cURL
       curl_close($ch);
-      EventLogger::log('enviarDadosSysteme-sucesso', $dadosAluno, $origin);
+      EventLogger::LogInfo('enviarDadosSysteme-sucesso', $dadosAluno, $origin);
       // Retorna a resposta
       return ["success" => $httpCode === 200, "response" => $response];
    }

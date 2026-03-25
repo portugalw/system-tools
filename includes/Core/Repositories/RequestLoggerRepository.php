@@ -3,7 +3,7 @@
 
 namespace SystemToolsHelpInfancia\Core\Repositories;
 
-class RequestLogger
+class RequestLoggerRepository
 {
    private $wpdb;
    private $table;

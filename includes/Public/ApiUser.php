@@ -3,8 +3,8 @@
 namespace SystemToolsHelpInfancia\Public;
 
 
-use SystemToolsHelpInfancia\Core\EventLogger;
-use SystemToolsHelpInfancia\Core\RequestLogger;
+use SystemToolsHelpInfancia\Core\Log\EventLogger;
+use SystemToolsHelpInfancia\Core\Log\RequestLogger;
 use SystemToolsHelpInfancia\Adapters\SystemeAdapter;
 use SystemToolsHelpInfancia\Util;
 
@@ -62,7 +62,7 @@ class ApiUser
       $dadosAluno = Util::concatenaDados($email, $phone_number, $name, $membership_id);
       $msgUserSuccess = 'Usuário criado com sucesso!';
 
-      EventLogger::log($tipo_evento, $dadosAluno, $origin);
+      EventLogger::LogInfo($tipo_evento, $dadosAluno, $origin);
 
       if ($tipo_evento != 'invoice_paid') {
 
@@ -82,16 +82,16 @@ class ApiUser
             'first_name' => $name,
             'role' => 'subscriber',
          ));
-         EventLogger::log('cria-usuario-sucesso', $dadosAluno, $origin);
+         EventLogger::LogInfo('cria-usuario-sucesso', $dadosAluno, $origin);
       } else {
          $user = get_user_by('email', $email);
          $user_id = $user->ID;
-         EventLogger::log('busca-usuario-existente-sucesso', $dadosAluno, $origin);
+         EventLogger::LogInfo('busca-usuario-existente-sucesso', $dadosAluno, $origin);
          $msgUserSuccess = 'Usuário atualizado com sucesso!';
       }
 
       if (is_wp_error($user_id)) {
-         EventLogger::log('busca-cria-usuario-erro', $dadosAluno . " ID: " . $user_id, $origin);
+         EventLogger::LogError('busca-cria-usuario-erro', $dadosAluno . " ID: " . $user_id, $origin);
          return new \WP_Error('user_creation_failed', 'Erro ao criar usuário.', array('status' => 500));
       }
 
@@ -101,7 +101,7 @@ class ApiUser
       if (class_exists('ARM_Members_Lite')) {
          $armember = new \ARM_Members_Lite();
          $armember->arm_add_user_to_armember_func($user_id, 0, $membership_id);
-         EventLogger::log('add-armember-sucesso', $dadosAluno . " ID: " . $user_id, $origin);
+         EventLogger::LogInfo('add-armember-sucesso', $dadosAluno . " ID: " . $user_id, $origin);
       }
 
       // Enviar e-mail ao usuário com seu plano
@@ -109,10 +109,10 @@ class ApiUser
       $arm_global_settings = new \ARM_global_settings_Lite();
       $retorno = $arm_global_settings->arm_mailer($arm_email_settings->templates->on_menual_activation, $user_id);
       $retorno = $arm_global_settings->arm_mailer($arm_email_settings->templates->change_password_user, $user_id);
-      EventLogger::log('email-usuario-novo-sucesso', $dadosAluno . " ID: " . $user_id, $origin);
+      EventLogger::LogInfo('email-usuario-novo-sucesso', $dadosAluno . " ID: " . $user_id, $origin);
 
       if ($origin == 'MANUAL_PLANILHA_INTEGRACAO') {
-         EventLogger::log('cadastro-via-planilha-usuario-novo-sucesso', $dadosAluno . " ID: " . $user_id, $origin);
+         EventLogger::LogInfo('cadastro-via-planilha-usuario-novo-sucesso', $dadosAluno . " ID: " . $user_id, $origin);
       } else {
          SystemeAdapter::enviarDadosSysteme($email, $phone_number, $name, $membership_id, $origin);
       }
