@@ -12,9 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentUserId = null;
 
-    const el = id => document.getElementById(id);
-
-
+    
      async function loadTransactions() {
                 clearHistory();
                 const result = await window.ST.fetchJson('get_transactions', { user_id: currentUserId });
@@ -103,10 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         el('historyContainer').classList.toggle('d-none', !show);
     }
 
-    function formatDate(date) {
-        return new Date(date).toLocaleString('pt-BR');
-    }
-
+    
     /*ITENS DO MODAL*/ 
 
     
@@ -143,19 +138,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const amount = el('quantidade-add').value;
     const note = el('justificativa-add').value;
     const userId = el('id-usuario').value;
+    const daysExpire = el('dias-expirar').value;
 
     if (!validateFields(amount, note)) return;
 
     openConfirmModal(
       `Deseja adicionar ${amount} pontos para este usuário?`,
-      () => submitPoints(userId, amount, note, 'add')
+      () => submitPoints(userId, amount, note, 'add', daysExpire)
     );
   });
 
   // =============================
   // SUBMISSÃO AJAX
   // =============================
-  function submitPoints(userId, amount, note, operation) {
+  function submitPoints(userId, amount, note, operation, daysExpire) {
 
 
     const formData = new FormData();
@@ -164,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('amount', amount);
     formData.append('note', note);
     formData.append('operation', operation);
+    formData.append('days_expire', daysExpire );
     formData.append('_wpnonce', ST_AJAX.nonce);
 
 

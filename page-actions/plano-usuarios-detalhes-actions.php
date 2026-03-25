@@ -4,34 +4,45 @@ if (!defined('ABSPATH')) exit;
 
 use SystemToolsHelpInfancia\Core\Services\EventStoreService;
 
-//add_action('wp_ajax_nopriv_get_client_details', 'st_get_client_details');
-add_action('wp_ajax_get_client_details', 'st_get_client_details');
+//ADMIN
 
+add_action('wp_ajax_get_client_details', 'st_get_client_details');
 add_action('wp_ajax_get_transactions', 'st_get_transactions');
 
-
-add_action('wp_ajax_nopriv_get_transactions_from_logged_user', 'st_get_transactions_from_logged_user');
-//add_action('wp_ajax_nopriv_get_transactions', 'st_get_transactions');
+// USUARIO LOGADO
+add_action('wp_ajax_get_client_details_from_logged_user', 'st_get_client_details_from_logged_user');
+add_action('wp_ajax_get_transactions_from_logged_user', 'st_get_transactions_from_logged_user');
+add_action('wp_ajax_get_active_batch_points_with_expiration_from_logged_user', 'st_get_active_batch_points_with_expiration_from_logged_user');
 
 
 add_action('wp_ajax_st_update_points', 'st_update_points');
 
-function st_get_client_details()
+
+function st_get_client_details_from_logged_user()
 {
 
-   //wp_send_json_success('OK');
+   check_ajax_referer('st_ajax_nonce');
 
-   // 🔐 Segurança
+   $user_id = get_current_user_id();
+
+   getClientDetails($user_id);
+}
+function st_get_client_details()
+{
    if (!current_user_can('manage_options')) {
       wp_send_json_error('Sem permissão', 403);
    }
 
-   // 🔐 Valida nonce
    check_ajax_referer('st_ajax_nonce');
-   //
-   global $wpdb;
 
    $user_id = intval($_GET['user_id'] ?? 0);
+
+   getClientDetails($user_id);
+}
+
+function getClientDetails($user_id)
+{
+   global $wpdb;
    if (!$user_id) {
       wp_send_json_error('Usuário inválido', 400);
    }
@@ -45,19 +56,34 @@ function st_get_client_details()
 
    $expiring = $wpdb->get_row(
       $wpdb->prepare("
-            SELECT SUM(points_remaining) AS total, MIN(expires_at) AS next_date
+            SELECT 
+               SUM(points_remaining) AS total,
+               MIN(expires_at) AS next_date,
+               SUM(CASE 
+                        WHEN DATE( expires_at) = (
+                           SELECT DATE(MIN(expires_at))
+                           FROM $tb_batches
+                           WHERE user_id = %d
+                              AND status = 'active'
+                              AND points_remaining > 0
+                              AND expires_at BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 31 DAY)
+                        )
+                        THEN points_remaining
+                        ELSE 0
+                  END) AS points_expiring_first
             FROM $tb_batches
             WHERE user_id = %d
-              AND status = 'active'
-              AND points_remaining > 0
-              AND expires_at >= NOW()
-        ", $user_id)
+            AND status = 'active'
+            AND points_remaining > 0
+            AND expires_at BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 31 DAY)
+        ", $user_id, $user_id)
    );
 
    wp_send_json_success([
       'balance'          => (int) ($balance->available_points ?? 0),
       'total_earned'     => (int) ($balance->total_earned ?? 0),
       'expiring_amount'  => (int) ($expiring->total ?? 0),
+      'points_expiring_first' => $expiring->points_expiring_first,
       'expiring_date'    => $expiring->next_date
          ? date('d/m/Y', strtotime($expiring->next_date))
          : '-',
@@ -100,13 +126,42 @@ function getTransactions($user_id)
    $tb_transactions = $wpdb->prefix . 'st_points_transactions';
    $tb_event_store = $wpdb->prefix . 'st_event_store';
 
-   $rows = $wpdb->get_results(
+   return $wpdb->get_results(
       $wpdb->prepare("
             SELECT t.txn_id, t.user_id, t.type, t.note, t.related_resource, t.created_at, t.amount
             FROM $tb_transactions t
             WHERE user_id = %d
             ORDER BY created_at DESC
             LIMIT 50
+        ", $user_id)
+   );
+}
+
+function st_get_active_batch_points_with_expiration_from_logged_user()
+{
+
+   $rows = getActiveBatchPointsWithExpiration(get_current_user_id());
+
+   wp_send_json_success($rows);
+}
+
+function getActiveBatchPointsWithExpiration($user_id)
+{
+   global $wpdb;
+   $tb_points_batches = $wpdb->prefix . 'st_points_batches';
+
+   return $wpdb->get_results(
+      $wpdb->prepare("
+             SELECT 
+         points_total,
+         points_remaining,
+         created_at,
+         expires_at
+            FROM $tb_points_batches
+            WHERE user_id = %d 
+            AND status = 'active'
+            AND points_remaining > 0
+            order by expires_at asc
         ", $user_id)
    );
 }

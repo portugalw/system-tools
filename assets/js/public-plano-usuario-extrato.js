@@ -1,80 +1,113 @@
+
+
 jQuery(function ($) {
 
+
     /* --- Troca de abas --- */
-    $("#extratoTabs button").on("click", function () {
+    $(".btn-tab").on("click", function () {
         let tab = $(this).data("tab");
 
-        $("#extratoTabs button").removeClass("active");
+        $(".btn-tab").removeClass("active");
         $(this).addClass("active");
 
-        $(".tab-pane").hide();
-        $("#tab-" + tab).show();
+        $(".tab").hide();
+        $("#st-tab-" + tab).show();
 
-        if (tab === "extrato") {
-            $("#filtros-extrato").show();
-            carregarExtrato(1);
+        if (tab === "mov") {
+            $("#st-filtros-mov").show();
+        
         } else {
-            $("#filtros-extrato").hide();
-            carregarExpirar();
+            $("#st-filtros-mov").hide();          
         }
     });
 
+     async function carregarDetalhesDoUsuario() {
+                const result = await window.ST.fetchJson('get_client_details_from_logged_user');
+                renderHeader(result.data);
+     }
+
+     async function carregarExtratoPontosAExpirar() {
+               const result = await window.ST.fetchJson('get_active_batch_points_with_expiration_from_logged_user');
+               renderExpirationExtract(result.data);
+     }
 
     /* --- Carregar extrato via AJAX --- */
     async function carregarExtrato(page = 1) {
 
+        const res = await window.ST.fetchJson('get_transactions_from_logged_user');
 
-      const res = await window.ST.fetchJson('get_transactions_from_logged_user');
+        if (!res.success) return;
 
-      console.log(res);
+        let rows = res.data;
 
-            if (!res.success) return;
+        renderExtract(rows);
 
-            let html = "";
-            res.data.items.forEach(item => {
-                html += `
-                <tr>
-                    <td>${item.data}</td>
-                    <td>${item.operacao}</td>
-                    <td>${item.parceiro}</td>
-                    <td>${item.pontos}</td>
-                    <td>${item.obs}</td>
-                </tr>`;
-            });
-
-            $("#tab-extrato tbody").html(html);
-            $("#paginacao-extrato").html(res.data.paginacao);
+        $("#paginacao-extrato").html(res.data.paginacao);
     }
 
+     function renderExtract(rows) {
+        const tbody = el('extractTableBody');
+        tbody.innerHTML = '';
+
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="4">Sem transações</td></tr>';
+            return;
+        }
+
+        rows.forEach(item => {
+            tbody.innerHTML += `
+                 <tr>
+                    <td>${formatDate(item.created_at)}</td>
+                    <td>${I18n.t(item.type)}</td>
+                    <td>${I18n.t(item.related_resource)}</td>
+                    <td>
+                        <span class="st-pontos ${item.type == 'credit' ? 'text-success' : 'text-danger'}">${item.amount}</span>
+                    
+                    </td>
+                    <td>${item.note || '-'}</td>
+                </tr>`;
+        });
+    }
+
+     function renderExpirationExtract(rows) {
+        const tbody = el('expirationTableBody');
+        tbody.innerHTML = '';
+
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="4">Sem transações</td></tr>';
+            return;
+        }
+
+        rows.forEach(item => {
+            tbody.innerHTML += `
+                 <tr>
+                    <td>${formatDate(item.created_at)}</td>
+                    <td><span class="st-pontos ">${item.points_total}</span></td>
+                    <td>${formatDate(item.expires_at)}</td>
+                    <td><span class="st-pontos ">${item.points_remaining}</span></td>
+                </tr>`;
+        });
+    }
+
+    function renderHeader(data) {
+        console.log(data);
+        el('viewBalance').innerText = data.balance;
+        el('viewExpiring').innerText = data.expiring_amount;
+        el('viewExpiringDate').innerText = data.expiring_date;
+        el('viewNextExpiringPoints').innerText = data.points_expiring_first;
+        
+        toggleLoading(false);
+    }
+
+    carregarDetalhesDoUsuario();
     carregarExtrato(1);
+    carregarExtratoPontosAExpirar();
+
 
 
     /* --- Filtro de operações --- */
     $("#filtro-operacao").on("change", function () {
         carregarExtrato(1);
     });
-
-
-    /* --- Carregar pontos a expirar --- */
-    function carregarExpirar() {
-
-        $.post(ST_EXTRATO.ajaxurl, {
-            action: "get_expirar",
-            _ajax_nonce: ST_EXTRATO.nonce
-        }, function (res) {
-            if (!res.success) return;
-
-            let html = "";
-            res.data.items.forEach(item => {
-                html += `
-                <tr>
-                    <td>${item.data_expira}</td>
-                    <td>${item.quantidade}</td>
-                </tr>`;
-            });
-
-            $("#tab-expirar tbody").html(html);
-        });
-    }
 
 });

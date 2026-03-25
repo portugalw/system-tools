@@ -1,5 +1,8 @@
 
 
+
+
+
 (function (window) {
 'use strict';
 
@@ -37,6 +40,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   
+  
 });
 
 function mascaraInteiros(event) {
@@ -51,3 +55,49 @@ function mascaraInteiros(event) {
 
     event.target.value = v;
 }
+
+const el = id => document.getElementById(id);
+
+function formatDate(date) {
+        return new Date(date).toLocaleString('pt-BR');
+ }
+
+
+ const I18n = (function () {
+  let dict = Object.create(null);
+  let loaded = false;
+
+  async function load(data) {
+    
+    //console.log(data);
+    if (loaded) return; // 🔥 evita múltiplos fetch
+
+    //const res = await fetch(url);
+   // const data = await res.json();
+
+    dict = Object.assign(Object.create(null), data);
+    //console.log(dict);
+    loaded = true;
+  }
+
+  function t(key, params) {
+    let text = dict[key];
+    if (text === undefined) return key;
+
+    if (!params) return text;
+
+    for (const k in params) {
+      text = text.split('{' + k + '}').join(params[k]);
+    }
+
+    return text;
+  }
+
+  return {
+    load,
+    t
+  };
+})();
+
+ I18n.load(window.I18N_DATA);
+

@@ -1,0 +1,12 @@
+{
+  "Hello World": "Olá Mundo",
+  "Save": "Salvar",
+  "Cancel": "Cancelar",
+  "User not found": "Usuário não encontrado",
+  "debited" : "Debitado",
+  "credit" : "Crédito",
+  "expire" : "Expirado",
+  "admin_granted" : "Creditado pelo Administrador",
+  "consume" : "Utilizado",
+  "null" : "-"
+}

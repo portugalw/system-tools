@@ -78,9 +78,51 @@ final class Plugin
       echo 'uninstalled';
    }
 
+   function enqueue_i18n()
+   {
+      $path = plugin_dir_path(ST_PLUGIN_FILE) . 'languages/system-tools-pt_BR.json';
+
+      $data = [];
+
+      if (file_exists($path)) {
+         $json = file_get_contents($path);
+         $data = json_decode($json, true);
+      }
+
+      wp_enqueue_script(
+         'mypluginscript',
+         ST_PLUGIN_SCRIPT_JS,
+         [],
+         '1.0',
+         true
+      );
+
+      // 🔥 injeta ANTES do script (crítico)
+      wp_add_inline_script(
+         'mypluginscript',
+         'window.I18N_DATA = ' . json_encode($data) . ';',
+         'before'
+      );
+   }
+
    function enqueueCommon()
    {
-      wp_enqueue_script('mypluginscript', ST_PLUGIN_SCRIPT_JS);
+      $this->enqueue_i18n();
+
+      wp_enqueue_script(
+         'mypluginscript',
+         ST_PLUGIN_SCRIPT_JS,
+         ['wp-i18n'], // 👈 IMPORTANTE
+         '1.0',
+         true
+      );
+
+      // Tradução do script principal
+      wp_set_script_translations(
+         'mypluginscript', // 👈 mesmo handle
+         'system-tools',  // 👈 seu text domain
+         plugin_dir_path(ST_PLUGIN_FILE) . 'languages'
+      );
 
       // Bootstrap CSS
       wp_enqueue_style(
@@ -99,6 +141,7 @@ final class Plugin
          true
       );
 
+
       wp_enqueue_style('mypluginstyle', ST_PLUGIN_STYLE_CSS);
 
       wp_localize_script('mypluginscript', 'ST_AJAX', [
@@ -112,6 +155,8 @@ final class Plugin
       $this->enqueueCommon();
    }
 
+
+
    function enqueue_admin()
    {
 
@@ -119,11 +164,33 @@ final class Plugin
 
       wp_enqueue_style('stpluginstyleadminlogscss', ST_PLUGIN_STYLE_ADMIN_LOGS_CSS);
 
+      wp_enqueue_script(
+         'st-admin-plano_usuario',
+         ST_PLUGIN_SCRIPT_PLANO_USUARIO_JS,
+         ['mypluginscript', 'bootstrap-js', 'jquery', 'wp-i18n'],
+         '1.0',
+         true
+      );
 
+      wp_set_script_translations(
+         'st-admin-plano_usuario',
+         'system-tools',
+         plugin_dir_path(ST_PLUGIN_FILE) . 'languages'
+      );
 
-      wp_enqueue_script('st-admin-plano_usuario', ST_PLUGIN_SCRIPT_PLANO_USUARIO_JS,   ['mypluginscript', 'bootstrap-js', 'jquery'],);
-      wp_enqueue_script('st-admin-plano_configuracao_vinculo', ST_PLUGIN_SCRIPT_PLANO_CONFIGURACAO_VINCULO_JS,   ['mypluginscript', 'bootstrap-js', 'jquery'],);
+      wp_enqueue_script(
+         'st-admin-plano_configuracao_vinculo',
+         ST_PLUGIN_SCRIPT_PLANO_CONFIGURACAO_VINCULO_JS,
+         ['mypluginscript', 'bootstrap-js', 'jquery', 'wp-i18n'],
+         '1.0',
+         true
+      );
 
+      wp_set_script_translations(
+         'st-admin-plano_configuracao_vinculo',
+         'system-tools',
+         plugin_dir_path(ST_PLUGIN_FILE) . 'languages'
+      );
       wp_enqueue_style(
          'st-admin-plano_usuario-css',
          ST_PLUGIN_STYLE_PLANO_USUARIO_CSS,
