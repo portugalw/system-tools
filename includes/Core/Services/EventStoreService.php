@@ -81,7 +81,7 @@ class EventStoreService
       $event = EventFactory::create(
          'UserPoints',
          $user_id,
-         'UserPlanPurchasePoints',
+         'PlanPurchased',
          $payload,
          $meta
       );
