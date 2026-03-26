@@ -8,7 +8,7 @@
  * Author URI:      YOUR SITE HERE
  * Text Domain:     system-tools-hi
  * Domain Path:     /languages
- * Version:         0.1.0
+ * Version:         1.1.0
  *
  * @package         System_Tools
  */
