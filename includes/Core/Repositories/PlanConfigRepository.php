@@ -75,9 +75,14 @@ class PlanConfigRepository
         c.points,
         c.days_expire,
         c.is_active,
-        c.updated_at
+        c.updated_at,
+        case when c.is_active is null
+            then 0
+            else 1 
+         END as has_config
        FROM $this->tableArm p
-       LEFT JOIN $this->table c ON p.arm_subscription_plan_id = c.arm_subscription_plan_id WHERE c.arm_subscription_plan_id = $arm_plan_id";
+       LEFT JOIN $this->table c ON p.arm_subscription_plan_id = c.arm_subscription_plan_id 
+       WHERE p.arm_subscription_plan_id = $arm_plan_id";
 
       return $this->wpdb->get_row($query);
    }

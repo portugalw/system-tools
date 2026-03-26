@@ -2,7 +2,8 @@
 
 namespace SystemToolsHelpInfancia\Public;
 
-
+use Error;
+use SystemToolsHelpInfancia\Core\Services\EventStoreService;
 use SystemToolsHelpInfancia\Core\Log\EventLogger;
 use SystemToolsHelpInfancia\Core\Log\RequestLogger;
 use SystemToolsHelpInfancia\Adapters\SystemeAdapter;
@@ -103,6 +104,12 @@ class ApiUser
          $armember->arm_add_user_to_armember_func($user_id, 0, $membership_id);
          EventLogger::LogInfo('add-armember-sucesso', $dadosAluno . " ID: " . $user_id, $origin);
       }
+
+      // Buscar configuracao do plano. Se for para add pontos, conceder pontos ao usuario
+
+      $eventStoreService = new EventStoreService($wpdb);
+
+      $eventResult = $eventStoreService->handle_purchase_plan_by_user($user_id, $membership_id,  $origin);
 
       // Enviar e-mail ao usuário com seu plano
       global $wpdb, $arm_email_settings, $ARMemberLite, $arm_global_settings;

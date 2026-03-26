@@ -126,5 +126,5 @@ $plans = $wpdb->get_results($sql);
    </div>
 </div>
 
-<?php include __DIR__ . '\modal-plano-configuracao-vinculo.php'; ?>
+<?php include __DIR__ . '/modal-plano-configuracao-vinculo.php'; ?>
 <?php include plugin_dir_path(ST_PLUGIN_FILE) . 'pages/util/modal-confirmacao.php'; ?>

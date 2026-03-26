@@ -2,6 +2,7 @@
 
 namespace SystemToolsHelpInfancia\Core\Services;
 
+use SystemToolsHelpInfancia\Core\Log\EventLogger;
 use SystemToolsHelpInfancia\Core\Factory\EventFactory;
 use SystemToolsHelpInfancia\Core\Repositories\EventStoreRepository;
 
@@ -36,8 +37,65 @@ class EventStoreService
          $meta
       );
 
-
       return $this->appendEvent($event);
+   }
+
+   function check_can_aplly_points_with_plan_config($plan, $plan_id, $origin)
+   {
+      if ($plan == null)
+         EventLogger::LogError('check-plan-config', 'Plano não encontrado. ID: ' . $plan_id, $origin);
+      // se retornar algum registro, conceder os pontos com o limite de data para vencimento.
+      if ($plan->has_config) {
+         if ($plan->is_active) {
+            if ($plan->points <= 0) {
+               EventLogger::LogError('check-plan-config', 'Plano com Pontos Incorretos: ' . $plan->points . '. ID: ' . $plan_id . ' ' . $plan->plan_name, $origin);
+            } else {
+               return true;
+            }
+
+            EventLogger::LogWarn('check-plan-config', 'Plano com configuração Inativa. ID: ' . $plan_id . ' ' . $plan->plan_name, $origin);
+         }
+      } else {
+         EventLogger::LogInfo('check-plan-config', 'Plano sem configuração. ID: ' . $plan_id . ' ' . $plan->plan_name, $origin);
+      }
+
+      return false;
+   }
+
+   function handle_purchase_plan_by_user($user_id, $plan_id, $origin)
+   {
+
+      $planConfigService = new PlanConfigService($this->wpdb);
+
+      $plan = $planConfigService->getPlanConfigDetailsByArmPlanId($plan_id);
+
+      if (!$this->check_can_aplly_points_with_plan_config($plan, $plan_id, $origin)) {
+         return null;
+      }
+
+      $expires_at = date('Y-m-d H:i:s', strtotime('+' . $plan->days_expire . ' days'));
+
+      $payload = ['user_id' => $user_id, 'plan_id' => $plan_id, 'points' => $plan->points, 'expires_at' => $expires_at, 'source' => 'plan_purchase'];
+      $meta = ['actor_id' => $user_id, 'ip' => $_SERVER['REMOTE_ADDR']];
+
+      $event = EventFactory::create(
+         'UserPoints',
+         $user_id,
+         'UserPlanPurchasePoints',
+         $payload,
+         $meta
+      );
+
+      $eventResult = $this->appendEvent($event);
+
+      if ($eventResult['success']) {
+         EventLogger::LogInfo('add-points-user', 'Pontos adicionados: ' . $plan->points . 'Expira: ' . $expires_at . ' ID: ' . $plan_id . ' ' . $plan->plan_name, $origin);
+      } else {
+         EventLogger::LogError('add-points-user', $eventResult['message'], $origin);
+      }
+
+
+      return $eventResult;
    }
 
    function handle_add_points_admin($user_id, $points, $days_expires_at, $description)
@@ -55,7 +113,6 @@ class EventStoreService
          $payload,
          $meta
       );
-
 
       return $this->appendEvent($event);
    }

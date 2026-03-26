@@ -13,12 +13,12 @@ jQuery(function ($) {
         $(".tab").hide();
         $("#st-tab-" + tab).show();
 
-        if (tab === "mov") {
+      /*  if (tab === "mov") {
             $("#st-filtros-mov").show();
         
         } else {
             $("#st-filtros-mov").hide();          
-        }
+        }*/
     });
 
      async function carregarDetalhesDoUsuario() {
