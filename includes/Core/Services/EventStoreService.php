@@ -75,7 +75,8 @@ class EventStoreService
 
       $expires_at = date('Y-m-d H:i:s', strtotime('+' . $plan->days_expire . ' days'));
 
-      $payload = ['user_id' => $user_id, 'plan_id' => $plan_id, 'points' => $plan->points, 'expires_at' => $expires_at, 'source' => 'plan_purchase'];
+      $description = 'Compra pelo plano ' . $plan->plan_name;
+      $payload = ['user_id' => $user_id, 'plan_id' => $plan_id, 'points' => $plan->points, 'expires_at' => $expires_at, 'source' => 'plan_purchase', 'description' => $description];
       $meta = ['actor_id' => $user_id, 'ip' => $_SERVER['REMOTE_ADDR']];
 
       $event = EventFactory::create(
@@ -103,7 +104,14 @@ class EventStoreService
       // $points = 10; // regra TODO BUSCAR DE TABELA DE CONFIGURACAO
       $expires_at = date('Y-m-d H:i:s', strtotime('+' . $days_expires_at . ' days'));
 
-      $payload = ['user_id' => $user_id, 'plan_id' => 9999, 'points' => $points, 'expires_at' => $expires_at, 'source' => 'admin_granted', 'description' => $description];
+      $payload = [
+         'user_id' => $user_id,
+         'plan_id' => 9999,
+         'points' => $points,
+         'expires_at' => $expires_at,
+         'source' => 'admin_granted',
+         'description' => $description
+      ];
       $meta = ['actor_id' => $user_id, 'ip' => $_SERVER['REMOTE_ADDR']];
 
       $event = EventFactory::create(

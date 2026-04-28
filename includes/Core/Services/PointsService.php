@@ -2,7 +2,6 @@
 
 namespace SystemToolsHelpInfancia\Core\Services;
 
-use SystemToolsHelpInfancia\Core\Repositories\EventStoreRepository;
 use SystemToolsHelpInfancia\Core\Repositories\PointsBatchRepository;
 
 if (!defined('ABSPATH')) exit;
@@ -12,7 +11,6 @@ class PointsService
 
    private $wpdb;
    private $tableBatches;
-   private $tableProjection;
    private $tableEvents;
    private $pointsBatchRepository;
 
@@ -21,7 +19,6 @@ class PointsService
    {
       $this->wpdb = $wpdb;
       $this->tableBatches = $wpdb->prefix . 'st_points_batches';
-      $this->tableProjection = $wpdb->prefix . 'st_points_projection';
       $this->tableEvents = $wpdb->prefix . 'st_points_events';
    }
 
@@ -243,7 +240,8 @@ class PointsService
          'amount' => -$expired_points,
          'balance_after' => $balance_after,
          'related_resource' =>  $source,
-         'batch_afected' => wp_json_encode($allocation)
+         'batch_afected' => wp_json_encode($allocation),
+         'metadata' => wp_json_encode($allocation),
       ], ['%d', '%s', '%s', '%d', '%d', '%s', '%s']);
 
       if ($result === false) {
@@ -270,89 +268,137 @@ class PointsService
    }
 
 
-   public function markBatchExpired(\wpdb $wpdb): void
+   /* $prefix = $wpdb->prefix;
+      $payload = $event['payload'];
+      $user_id = (int)$event['aggregate_id'];
+      $batch_id = (int)$payload['batch_id'];
+      $expired_points = (int)$payload['expired_points'];
+      $allocation = ['batch_id' => $batch_id, 'expired_points' => $expired_points];
+      $source = (int)$payload['source'];*/
+
+   public function markBatchExpired(): void
    {
-      $expiredBatches = $wpdb->get_results(
-         "SELECT * FROM $this->tableBatches 
-             WHERE expires_at <= NOW() AND status = 'active'"
-      );
+      global $wpdb;
 
-      foreach ($expiredBatches as $batch) {
-         $wpdb->update(
-            $this->tableBatches,
-            ['status' => 'expired'],
-            ['id' => $batch->id]
-         );
+      $limit = 30;
 
-         $this->recordEvent($batch->user_id, 'POINTS_EXPIRED', [
-            'batch_id' => $batch->id,
-            'expired_amount' => ($batch->amount - $batch->used)
-         ]);
+      // 🔹 Cria execução (run)
+      $wpdb->insert("{$wpdb->prefix}st_points_expiration_runs", [
+         'started_at' => current_time('mysql'),
+         'status' => 'running'
+      ]);
 
-         $this->recalculateProjection($batch->user_id);
+      $run_id = $wpdb->insert_id;
+
+      $total = 0;
+      $success = 0;
+      $error = 0;
+
+      try {
+
+         do {
+            $batches = $wpdb->get_results($wpdb->prepare("
+                SELECT batch_id, user_id, points_remaining
+                FROM {$this->tableBatches}
+                WHERE expires_at <= NOW()
+                  AND status = 'active'
+                LIMIT %d
+            ", $limit));
+
+            if (empty($batches)) {
+               break;
+            }
+
+            foreach ($batches as $batch) {
+
+               $total++;
+
+               try {
+
+                  // 🔹 Idempotência
+                  if ((int)$batch->points_remaining <= 0) {
+                     $this->logExpiration($run_id, $batch, 'skipped', 'Batch sem pontos');
+                     continue;
+                  }
+
+                  // 🔹 Monta evento esperado pelo applyExpire
+                  $event = [
+                     'event_id' => uniqid('expire_', true),
+                     'event_type' => 'PointsExpired',
+                     'aggregate_id' => (int)$batch->user_id,
+                     'payload' => [
+                        'batch_id'       => (int)$batch->batch_id,
+                        'expired_points' => (int)$batch->points_remaining,
+                        'source'         => 'cron-expire'
+                     ]
+                  ];
+
+                  // 🔥 Chamada direta (sem event store)
+                  self::apply($wpdb, $event);
+
+                  $success++;
+
+                  $this->logExpiration(
+                     $run_id,
+                     $batch,
+                     'success',
+                     'Expiração aplicada via applyExpire'
+                  );
+               } catch (\Throwable $e) {
+
+                  $error++;
+
+                  $this->logExpiration(
+                     $run_id,
+                     $batch,
+                     'error',
+                     $e->getMessage(),
+                     $e->getTraceAsString()
+                  );
+
+                  continue;
+               }
+            }
+         } while (count($batches) === $limit);
+
+         // 🔹 Finaliza execução
+         $wpdb->update("{$wpdb->prefix}st_points_expiration_runs", [
+            'finished_at' => current_time('mysql'),
+            'total_records' => $total,
+            'success_count' => $success,
+            'error_count' => $error,
+            'status' => 'finished'
+         ], ['run_id' => $run_id]);
+      } catch (\Throwable $e) {
+
+         $wpdb->update("{$wpdb->prefix}st_points_expiration_runs", [
+            'finished_at' => current_time('mysql'),
+            'status' => 'failed',
+            'error_message' => $e->getMessage()
+         ], ['run_id' => $run_id]);
+
+         error_log('[PointsExpiration] ERRO CRÍTICO: ' . $e->getMessage());
       }
    }
 
-   /**
-    * Recalcula o total e disponível do usuário (projeção).
-    */
-   private function recalculateProjection(int $user_id): void
-   {
-      $result = $this->wpdb->get_row(
-         $this->wpdb->prepare(
-            "SELECT 
-                    SUM(amount) AS total,
-                    SUM(amount - used) AS available
-                 FROM $this->tableBatches
-                 WHERE user_id = %d AND status = 'active'",
-            $user_id
-         )
-      );
+   private function logExpiration(
+      int $run_id,
+      $batch,
+      string $status,
+      string $message,
+      string $stack = ''
+   ): void {
 
-      $total = $result->total ?? 0;
-      $available = $result->available ?? 0;
-
-      $exists = $this->wpdb->get_var(
-         $this->wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->tableProjection WHERE user_id = %d",
-            $user_id
-         )
-      );
-
-      if ($exists) {
-         $this->wpdb->update(
-            $this->tableProjection,
-            [
-               'total_points' => $total,
-               'available_points' => $available,
-               'last_updated' => current_time('mysql')
-            ],
-            ['user_id' => $user_id]
-         );
-      } else {
-         $this->wpdb->insert(
-            $this->tableProjection,
-            [
-               'user_id' => $user_id,
-               'total_points' => $total,
-               'available_points' => $available,
-               'last_updated' => current_time('mysql')
-            ]
-         );
-      }
-   }
-
-   /**
-    * Registra evento no Event Store.
-    */
-   private function recordEvent(int $user_id, string $type, array $data): void
-   {
       $this->wpdb->insert(
-         $this->tableEvents,
+         "{$this->wpdb->prefix}st_points_expiration_logs",
          [
-            'user_id' => $user_id,
-            'event_type' => $type,
-            'data_json' => wp_json_encode($data),
+            'run_id' => $run_id,
+            'batch_id' => (int)$batch->batch_id,
+            'user_id' => (int)$batch->user_id,
+            'points' => (int)$batch->points_remaining,
+            'status' => $status,
+            'message' => $message,
+            'error_stack' => $stack,
             'created_at' => current_time('mysql')
          ]
       );

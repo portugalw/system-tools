@@ -35,7 +35,7 @@ define('ST_PAGE_ADMIN_DEBITO_PONTOS_USUARIO', $pagesPrefixFolder  . '/plano-usua
 define('ST_PAGE_ADMIN_EXPIRAR_PONTOS_USUARIO', $pagesPrefixFolder  . '/plano-usuario/expirar-pontos.php');
 define('ST_PAGE_ADMIN_PLANO_USUARIOS_DETALHES', $pagesPrefixFolder  . '/plano-usuario/lista-detalhes.php');
 define('ST_PAGE_ADMIN_PLANO_CONFIGURACAO_VINCULO', $pagesPrefixFolder  . '/plano-configuracao/plano-configuracao-vinculo.php');
-
+define('ST_PAGE_ADMIN_HISTORICO_EXECUCAO_EXPIRACAO', $pagesPrefixFolder  . '/historico/historico-execucao-expiracao.php');
 
 define('ST_PAGE_ADMIN_EVENT_LOG', $pagesPrefixFolder  . '/event-log-view.php');
 define('ST_PAGE_ADMIN_REQUEST_LOG', $pagesPrefixFolder  . '/request-log-view.php');
@@ -45,6 +45,7 @@ define('ST_PAGE_PUBLIC_PLANO_USUARIO_EXTRATO', $pagesPrefixFolder  . '/public/pl
 $pagesActionPrefixFolder = ST_PLUGIN_PATH . '/page-actions';
 define('ST_PAGE_ACTION_ADMIN_PLANO_USUARIOS_DETALHES', $pagesActionPrefixFolder  . '/plano-usuarios-detalhes-actions.php');
 define('ST_PAGE_ACTION_ADMIN_PLANO_CONFIGURACAO', $pagesActionPrefixFolder  . '/plano-configuracao-vinculo-actions.php');
+define('ST_PAGE_ACTION_ADMIN_HISTORICO_EXECUCAO_EXPIRACAO', $pagesActionPrefixFolder  . '/historico-execucao-expiracao-actions.php');
 
 define('ST_PAGE_ACTION_PUBLIC_PLANO_USUARIO_EXTRATO', $pagesActionPrefixFolder  . '/public/plano-usuario-extrato-actions.php');
 
@@ -55,6 +56,7 @@ define('ST_SHORT_CODE_PUBLIC_EMBED_FORMULARIO_HELP_INFANCIA', $shortCodesPrefixF
 
 require_once ST_PAGE_ACTION_ADMIN_PLANO_USUARIOS_DETALHES;
 require_once ST_PAGE_ACTION_ADMIN_PLANO_CONFIGURACAO;
+require_once ST_PAGE_ACTION_ADMIN_HISTORICO_EXECUCAO_EXPIRACAO;
 require_once ST_PAGE_ACTION_PUBLIC_PLANO_USUARIO_EXTRATO;
 
 require_once ST_SHORT_CODE_PUBLIC_PLANO_USUARIO_EXTRATO;

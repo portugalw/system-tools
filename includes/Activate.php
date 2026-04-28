@@ -164,5 +164,48 @@ class Activate
          )  $charset_collate;";
 
       dbDelta($sql_tabela_st_plans_config);
+
+
+
+      $table_runs = $wpdb->prefix . 'st_points_expiration_runs';
+
+      // 🔥 Tabela de RUN
+      $sql_runs = "CREATE TABLE $table_runs (
+        run_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        started_at DATETIME NOT NULL,
+        finished_at DATETIME NULL,
+        total_records INT DEFAULT 0,
+        success_count INT DEFAULT 0,
+        error_count INT DEFAULT 0,
+        status VARCHAR(20) DEFAULT 'running',
+        error_message TEXT NULL,
+        PRIMARY KEY (run_id),
+        KEY idx_status (status),
+        KEY idx_started_at (started_at)
+    ) $charset_collate;";
+
+      dbDelta($sql_runs);
+
+
+      $table_logs = $wpdb->prefix . 'st_points_expiration_logs';
+      // 🔥 Tabela de LOG
+      $sql_logs = "CREATE TABLE $table_logs (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        run_id BIGINT UNSIGNED NOT NULL,
+        batch_id BIGINT UNSIGNED NOT NULL,
+        user_id BIGINT UNSIGNED NOT NULL,
+        points INT DEFAULT 0,
+        status VARCHAR(20),
+        message TEXT NULL,
+        error_stack LONGTEXT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_run_id (run_id),
+        KEY idx_batch_id (batch_id),
+        KEY idx_user_id (user_id)
+    ) $charset_collate;";
+
+
+      dbDelta($sql_logs);
    }
 }

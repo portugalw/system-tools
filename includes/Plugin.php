@@ -290,6 +290,17 @@ final class Plugin
          40,
          'dashicons-tickets-alt'
       );
+
+      add_submenu_page(
+         'system_tools',
+         'Lista de Execuções Expiração',
+         'Lista de Execuções Expiração',
+         'manage_options',
+         'list-execution-expiration',
+         array($this, 'admin_page_historic_expiration_execution_callback'), // Callback
+         40,
+         'dashicons-tickets-alt'
+      );
    }
 
    function admin_page_index_callback()
@@ -328,6 +339,11 @@ final class Plugin
    function admin_page_plan_config_attach_callback()
    {
       require_once ST_PAGE_ADMIN_PLANO_CONFIGURACAO_VINCULO;
+   }
+
+   function admin_page_historic_expiration_execution_callback()
+   {
+      require_once ST_PAGE_ADMIN_HISTORICO_EXECUCAO_EXPIRACAO;
    }
 
 
