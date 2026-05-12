@@ -3,6 +3,7 @@
 namespace SystemToolsHelpInfancia\Core\Services;
 
 use SystemToolsHelpInfancia\Core\Repositories\PointsBatchRepository;
+use SystemToolsHelpInfancia\Core\Factory\EventFactory;
 
 if (!defined('ABSPATH')) exit;
 
@@ -26,30 +27,38 @@ class PointsService
    {
       $pointsBatchRepository = new PointsBatchRepository($wpdb);
 
+      try {
+         $wpdb->query('START TRANSACTION');
 
-      switch ($event['event_type']) {
-         case 'PlanPurchased':
-         case 'PointsCredited':
-         case 'AdminGrantedPoints':
-            self::applyCredit($wpdb, $event);
-            break;
+         switch ($event['event_type']) {
+            case 'PlanPurchased':
+            case 'PointsCredited':
+            case 'AdminGrantedPoints':
+               self::applyCredit($wpdb, $event);
+               break;
 
-         case 'PointsConsumed':
-         case 'AdminDeductedPoints':
-            self::applyConsume($wpdb, $event);
-            break;
+            case 'PointsConsumed':
+            case 'AdminDeductedPoints':
+               self::applyConsume($wpdb, $event);
+               break;
 
-         case 'PointsExpired':
-            self::applyExpire($wpdb, $event);
-            break;
+            case 'PointsExpired':
+               self::applyExpire($wpdb, $event);
+               break;
 
-         case 'PointsCompensated':
-            self::applyCompensate($wpdb, $event);
-            break;
+            case 'PointsCompensated':
+               self::applyCompensate($wpdb, $event);
+               break;
 
-         default:
-            // Unknown event -> ignore or log
-            break;
+            default:
+               // Unknown event -> ignore or log
+               break;
+         }
+
+         $wpdb->query('COMMIT');
+      } catch (\Throwable $e) {
+         $wpdb->query('ROLLBACK');
+         throw $e; // Relança a exceção para ser tratada e logada pelo chamador (ex: markBatchExpired)
       }
    }
 
@@ -196,10 +205,13 @@ class PointsService
       $payload = $event['payload'];
       $user_id = (int)$event['aggregate_id'];
       $batch_id = (int)$payload['batch_id'];
-      $expired_points = (int)$payload['expired_points'];
-      $allocation = ['batch_id' => $batch_id, 'expired_points' => $expired_points];
-      $source = (int)$payload['source'];
+      $expired_points = (int)$payload['expired_points'];      
+      $source = $payload['source'];
+      $expires_at = $payload['expires_at'];
+      $allocation[] = ['batch_id' => $batch_id, 'expired_points' => $expired_points, 'expires_at' => $expires_at];
 
+      $note = 'Expiraram em ' . date('d/m/Y', strtotime($expires_at));
+      
       if ($expired_points <= 0) {
          // Still mark batch expired if needed
          $wpdb->query($wpdb->prepare("UPDATE {$prefix}st_points_batches SET status='expired' WHERE batch_id=%d", $batch_id));
@@ -242,7 +254,8 @@ class PointsService
          'related_resource' =>  $source,
          'batch_afected' => wp_json_encode($allocation),
          'metadata' => wp_json_encode($allocation),
-      ], ['%d', '%s', '%s', '%d', '%d', '%s', '%s']);
+         'note' => $note,
+      ], ['%d', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s']);
 
       if ($result === false) {
          throw new \Exception("Erro SQL: {$wpdb->last_error}");
@@ -276,10 +289,8 @@ class PointsService
       $allocation = ['batch_id' => $batch_id, 'expired_points' => $expired_points];
       $source = (int)$payload['source'];*/
 
-   public function markBatchExpired(): void
+   public function markBatchExpired(\wpdb $wpdb): void
    {
-      global $wpdb;
-
       $limit = 30;
 
       // 🔹 Cria execução (run)
@@ -298,7 +309,7 @@ class PointsService
 
          do {
             $batches = $wpdb->get_results($wpdb->prepare("
-                SELECT batch_id, user_id, points_remaining
+                SELECT batch_id, user_id, points_remaining, expires_at
                 FROM {$this->tableBatches}
                 WHERE expires_at <= NOW()
                   AND status = 'active'
@@ -318,20 +329,22 @@ class PointsService
                   // 🔹 Idempotência
                   if ((int)$batch->points_remaining <= 0) {
                      $this->logExpiration($run_id, $batch, 'skipped', 'Batch sem pontos');
-                     continue;
                   }
 
-                  // 🔹 Monta evento esperado pelo applyExpire
-                  $event = [
-                     'event_id' => uniqid('expire_', true),
-                     'event_type' => 'PointsExpired',
-                     'aggregate_id' => (int)$batch->user_id,
-                     'payload' => [
+                  $payload = [
                         'batch_id'       => (int)$batch->batch_id,
                         'expired_points' => (int)$batch->points_remaining,
-                        'source'         => 'cron-expire'
-                     ]
+                        'source'         => 'cron-expire',
+                        'expires_at'     => $batch->expires_at
                   ];
+
+                    $event = EventFactory::create(
+                        'UserPoints',
+                        (int)$batch->user_id,
+                        'PointsExpired',
+                        $payload,
+                        $payload
+                     );
 
                   // 🔥 Chamada direta (sem event store)
                   self::apply($wpdb, $event);

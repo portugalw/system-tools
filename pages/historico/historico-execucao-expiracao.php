@@ -37,75 +37,56 @@ $total_pages = ceil($total / $per_page);
    <div class="card p-4">
 
       <!-- 🔹 controle de paginação -->
-      <form method="get" class="mb-3">
-         <input type="hidden" name="page" value="<?= esc_attr($_GET['page'] ?? '') ?>">
-
-         <select name="per_page" onchange="this.form.submit()">
+      <div class="mb-3">
+         <select id="per-page-select" name="per_page" class="form-select w-auto">
             <option value="25" <?= $per_page == 25 ? 'selected' : '' ?>>25</option>
             <option value="50" <?= $per_page == 50 ? 'selected' : '' ?>>50</option>
             <option value="100" <?= $per_page == 100 ? 'selected' : '' ?>>100</option>
          </select>
-      </form>
+      </div>
 
-      <table class="table table-hover align-middle">
-         <thead>
-            <tr>
-               <th>ID</th>
-               <th>Status</th>
-               <th>Total</th>
-               <th>Sucesso</th>
-               <th>Erro</th>
-               <th>Início</th>
-               <th>Fim</th>
-               <th>Ação</th>
-            </tr>
-         </thead>
-         <tbody>
-            <?php if ($runs): foreach ($runs as $run): ?>
-                  <tr>
-                     <td><?= $run->run_id ?></td>
-
-                     <td>
-                        <span class="badge bg-<?= $run->status === 'finished' ? 'success' : ($run->status === 'failed' ? 'danger' : 'warning') ?>"> <?= esc_html($run->status) ?>
-                        </span>
-                     </td>
-
-                     <td><?= $run->total_records ?></td>
-                     <td><?= $run->success_count ?></td>
-                     <td><?= $run->error_count ?></td>
-
-                     <td><?= $run->started_at ?></td>
-                     <td><?= $run->finished_at ?: '-' ?></td>
-
-                     <td>
-                        <button class="btn btn-outline-primary btn-sm btn-view-run"
-                           data-run-id="<?= $run->run_id ?>">
-                           Detalhes
-                        </button>
-                     </td>
-                  </tr>
-               <?php endforeach;
-            else: ?>
-               <tr>
-                  <td colspan="8" class="text-center text-muted">
-                     Nenhuma execução encontrada
-                  </td>
-               </tr>
-            <?php endif; ?>
-         </tbody>
-      </table>
-
-      <!-- 🔹 paginação -->
-      <div class="mt-3">
-         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-            <a class="btn btn-sm <?= $i == $page ? 'btn-primary' : 'btn-outline-secondary' ?>"
-               href="?page=<?= esc_attr($_GET['page']) ?>&paged=<?= $i ?>&per_page=<?= $per_page ?>">
-               <?= $i ?>
-            </a>
-         <?php endfor; ?>
+      <div id="table-container">
+          <?php include __DIR__ . '/table-historico-execucao-expiracao.php'; ?>
       </div>
 
    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tableContainer = document.getElementById('table-container');
+    const perPageSelect = document.getElementById('per-page-select');
+
+    function loadTable(paged = 1) {
+        const perPage = perPageSelect.value;
+        tableContainer.innerHTML = '<p class="text-center text-muted py-3">Carregando...</p>';
+
+        fetch(ajaxurl + '?action=st_get_historico_expiracao_table&paged=' + paged + '&per_page=' + perPage)
+            .then(res => res.text())
+            .then(html => {
+                tableContainer.innerHTML = html;
+            })
+            .catch(err => {
+                tableContainer.innerHTML = '<p class="text-center text-danger py-3">Erro ao carregar dados.</p>';
+            });
+    }
+
+    perPageSelect.addEventListener('change', function() {
+        loadTable(1);
+    });
+
+    tableContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.pagination-link')) {
+            e.preventDefault();
+            const link = e.target.closest('.pagination-link');
+            const page = link.dataset.page;
+            if (page) {
+                loadTable(page);
+            }
+        }
+    });
+});
+</script>
+
 
 <?php include __DIR__ . '/modal-detalhes-historico-execucao-expiracao.php'; ?>

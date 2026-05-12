@@ -20,10 +20,10 @@
 </div>
 
 <script>
-   document.querySelectorAll('.btn-view-run').forEach(btn => {
-      btn.addEventListener('click', function() {
-
-         const runId = this.dataset.runId;
+   document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.btn-view-run');
+      if (btn) {
+         const runId = btn.dataset.runId;
 
          fetch(ajaxurl + '?action=st_get_run_details&run_id=' + runId)
             .then(res => res.text())
@@ -33,6 +33,6 @@
                const modal = new bootstrap.Modal(document.getElementById('runDetailsModal'));
                modal.show();
             });
-      });
+      }
    });
 </script>

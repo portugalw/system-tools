@@ -52,6 +52,7 @@ $users = $wpdb->get_results($sql);
       <table class="table table-hover align-middle">
          <thead>
             <tr>
+               <th>ID Cliente</th>
                <th>Cliente</th>
                <th>Plano</th>
                <th class="text-center">Pontos</th>
@@ -61,6 +62,7 @@ $users = $wpdb->get_results($sql);
          <tbody>
             <?php if ($users): foreach ($users as $user): ?>
                   <tr>
+                     <td><?= $user->ID ?></td>
                      <td>
                         <strong><?= esc_html($user->display_name) ?></strong><br>
                         <small class="text-muted"><?= esc_html($user->user_email) ?></small>

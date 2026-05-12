@@ -8,7 +8,7 @@
  * Author URI:      YOUR SITE HERE
  * Text Domain:     system-tools-hi
  * Domain Path:     /languages
- * Version:         1.1.0
+ * Version:         1.2.0
  *
  * @package         System_Tools
  */
@@ -54,6 +54,11 @@ $shortCodesPrefixFolder = ST_PLUGIN_PATH . '/includes/short-codes';
 define('ST_SHORT_CODE_PUBLIC_PLANO_USUARIO_EXTRATO', $shortCodesPrefixFolder  . '/public/short-code-extrato-perfil-usuario.php');
 define('ST_SHORT_CODE_PUBLIC_EMBED_FORMULARIO_HELP_INFANCIA', $shortCodesPrefixFolder  . '/public/short-code-formulario-help-infancia.php');
 
+
+$backGroundServicePrefixFolder = ST_PLUGIN_PATH . '/includes/background-services';
+define('ST_BACKGROUND_SERVICE_POINTS_EXPIRE_CLI', $backGroundServicePrefixFolder  . '/points-expire-cli.php');
+
+
 require_once ST_PAGE_ACTION_ADMIN_PLANO_USUARIOS_DETALHES;
 require_once ST_PAGE_ACTION_ADMIN_PLANO_CONFIGURACAO;
 require_once ST_PAGE_ACTION_ADMIN_HISTORICO_EXECUCAO_EXPIRACAO;
@@ -62,6 +67,7 @@ require_once ST_PAGE_ACTION_PUBLIC_PLANO_USUARIO_EXTRATO;
 require_once ST_SHORT_CODE_PUBLIC_PLANO_USUARIO_EXTRATO;
 require_once ST_SHORT_CODE_PUBLIC_EMBED_FORMULARIO_HELP_INFANCIA;
 
+require_once ST_BACKGROUND_SERVICE_POINTS_EXPIRE_CLI;  
 
 require_once ST_PLUGIN_PATH . '/includes/Plugin.php';
 require_once ST_PLUGIN_PATH . '/includes/Activate.php';
