@@ -53,6 +53,7 @@ define('ST_PAGE_ACTION_PUBLIC_PLANO_USUARIO_EXTRATO', $pagesActionPrefixFolder  
 $shortCodesPrefixFolder = ST_PLUGIN_PATH . '/includes/short-codes';
 define('ST_SHORT_CODE_PUBLIC_PLANO_USUARIO_EXTRATO', $shortCodesPrefixFolder  . '/public/short-code-extrato-perfil-usuario.php');
 define('ST_SHORT_CODE_PUBLIC_EMBED_FORMULARIO_HELP_INFANCIA', $shortCodesPrefixFolder  . '/public/short-code-formulario-help-infancia.php');
+define('ST_SHORT_CODE_PUBLIC_INFO_PONTOS', $shortCodesPrefixFolder  . '/public/short-code-info-pontos.php');
 
 
 $backGroundServicePrefixFolder = ST_PLUGIN_PATH . '/includes/background-services';
@@ -66,6 +67,7 @@ require_once ST_PAGE_ACTION_PUBLIC_PLANO_USUARIO_EXTRATO;
 
 require_once ST_SHORT_CODE_PUBLIC_PLANO_USUARIO_EXTRATO;
 require_once ST_SHORT_CODE_PUBLIC_EMBED_FORMULARIO_HELP_INFANCIA;
+require_once ST_SHORT_CODE_PUBLIC_INFO_PONTOS;
 
 require_once ST_BACKGROUND_SERVICE_POINTS_EXPIRE_CLI;  
 

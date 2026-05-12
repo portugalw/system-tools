@@ -1,6 +1,6 @@
 <?php
 
-namespace SystemToolsHelpInfancia\Public;
+namespace SystemToolsHelpInfancia\Public\Api;
 
 use Error;
 use SystemToolsHelpInfancia\Core\Services\EventStoreService;

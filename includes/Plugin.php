@@ -2,7 +2,7 @@
 
 namespace SystemToolsHelpInfancia;
 
-use SystemToolsHelpInfancia\Public\ApiUser;
+use SystemToolsHelpInfancia\Public\Api\ApiUser;
 use SystemToolsHelpInfancia\Activate;
 use SystemToolsHelpInfancia\Deactivate;
 
